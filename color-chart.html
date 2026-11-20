@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#f3f1ec">
 <title>収穫色目表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Noto+Sans+Thai:wght@400;700;900&display=swap">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 /* 色の判断を狂わせないよう、背景は無彩色（グレー系）にしています */
@@ -12,12 +14,15 @@
   --bg:#f3f1ec;--card:#ffffff;--line:#dedad2;
   --text:#222;--muted:#6b665e;--accent:#c0392b;--ok:#2e7d32;
 }
-html,body{font-family:'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+html,body{font-family:'Hiragino Sans','Noto Sans JP','Noto Sans Thai','Meiryo',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
 body{max-width:960px;margin:0 auto;padding:16px 16px 48px}
-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}
 h1{font-size:24px;font-weight:900;letter-spacing:1px}
 h1 small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:0;margin-top:2px}
-.back{font-size:14px;color:var(--muted);text-decoration:none;white-space:nowrap}
+.back{font-size:14px;color:var(--muted);text-decoration:none;white-space:nowrap;padding-top:6px}
+.langs{display:flex;gap:6px;margin-bottom:10px}
+.lang{flex:1;padding:10px 4px;border-radius:999px;border:2px solid var(--line);background:var(--card);font:inherit;font-size:15px;font-weight:800;color:var(--muted);cursor:pointer}
+.lang.active{border-color:#333;background:#333;color:#fff}
 .tabs{display:flex;gap:8px;margin-bottom:12px}
 .tab{flex:1;padding:12px 8px;border-radius:12px;border:2px solid var(--line);background:var(--card);font:inherit;font-size:16px;font-weight:800;color:var(--muted);cursor:pointer}
 .tab.active{border-color:var(--accent);color:#fff;background:var(--accent)}
@@ -26,26 +31,34 @@ h1 small{display:block;font-size:12px;font-weight:600;color:var(--muted);letter-
 .lv{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:10px 8px 12px;text-align:center;position:relative;transition:opacity .2s,border-color .2s}
 .lv .num{font-size:40px;font-weight:900;line-height:1}
 .lv .name{font-size:14px;font-weight:800;margin-top:2px}
+.lv .jp{font-size:11px;color:var(--muted);font-weight:700}
 .lv .pct{font-size:12px;color:var(--muted)}
 .lv svg{width:100%;max-width:130px;height:auto;display:block;margin:6px auto}
 .lv .desc{font-size:12.5px;line-height:1.6;text-align:left}
 .lv .use{font-size:11.5px;color:var(--muted);text-align:left;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
 .lv.dim{opacity:.35}
 .lv.on{border-color:var(--ok)}
-.lv.on::after{content:"収穫OK";position:absolute;top:6px;right:6px;background:var(--ok);color:#fff;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px}
+.lv.on::after{content:attr(data-ok);position:absolute;top:6px;right:6px;background:var(--ok);color:#fff;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px}
 .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-top:18px}
 .panel h2{font-size:17px;margin-bottom:10px}
+.panel h2 .tag{font-size:11px;background:#eee;color:var(--muted);padding:2px 8px;border-radius:6px;vertical-align:middle;margin-left:6px}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
-.row label{font-size:14px;font-weight:700;min-width:5.5em}
-select,input[type=date],input[type=text]{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0}
+.row>label:first-child{font-size:14px;font-weight:700;min-width:5.5em}
+.chk{font-size:15px;display:inline-flex;align-items:center;gap:4px;margin-right:10px}
+.chk input{width:18px;height:18px}
+select,input[type=date],input[type=text]{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;min-width:0;max-width:100%}
 input[type=text]{flex:1;min-width:180px}
-textarea{width:100%;font:inherit;font-size:15px;line-height:1.7;padding:10px;border:1px solid var(--line);border-radius:10px;min-height:210px;background:#fafafa}
+textarea{width:100%;font:inherit;font-size:15px;line-height:1.7;padding:10px;border:1px solid var(--line);border-radius:10px;min-height:260px;background:#fafafa}
 .btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 button.b{font:inherit;font-size:15px;font-weight:800;padding:12px 18px;border-radius:12px;border:none;cursor:pointer;background:var(--accent);color:#fff}
 button.b.sub{background:#fff;color:var(--text);border:2px solid var(--line)}
 .notes{font-size:13px;line-height:1.8;color:var(--muted)}
 .notes li{margin-left:1.2em}
 .print-only{display:none}
+/* 印刷用：3か国語を並べる */
+.ml{text-align:left;font-size:11px;line-height:1.5;margin-top:4px}
+.ml div{margin-top:3px}
+.ml b{display:inline-block;min-width:1.9em;font-size:9.5px;color:#fff;background:#666;border-radius:3px;text-align:center;margin-right:3px}
 @media (max-width:760px){
   .grid{grid-template-columns:1fr}
   .lv{display:grid;grid-template-columns:96px 1fr;gap:4px 12px;text-align:left;align-items:center;padding:10px 12px}
@@ -55,124 +68,185 @@ button.b.sub{background:#fff;color:var(--text);border:2px solid var(--line)}
   .lv .num{font-size:34px}
 }
 @media print{
-  @page{size:A4 landscape;margin:8mm}
-  body{max-width:none;padding:0;background:#fff}
-  .no-print,.tabs,.panel,.back{display:none!important}
+  @page{size:A4 landscape;margin:7mm}
+  html,body{background:#fff}
+  body{max-width:none;padding:0}
+  .no-print,.tabs,.langs,.panel,.back,header,.rule.screen{display:none!important}
   .print-only{display:block}
   .sheet{page-break-after:always}
   .sheet:last-child{page-break-after:auto}
-  .lv{opacity:1!important;border-color:#999!important}
+  .lv{opacity:1!important;border-color:#999!important;padding:6px 6px 8px}
   .lv::after{display:none!important}
-  .lv .num{font-size:44px}
-  .lv .desc{font-size:12px}
+  .lv .num{font-size:38px}
+  .lv svg{max-width:150px;margin:4px auto}
+  .lv .name{font-size:16px}
+  .ml{font-size:13.5px;line-height:1.55}
+  .ml b{font-size:11px}
+  .rule{font-size:13px;line-height:1.6;padding:8px 12px;margin-bottom:8px}
+  .sheet h3{font-size:20px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
-.sheet h3{font-size:20px;margin:6px 0 8px}
+.sheet h3{font-size:18px;margin:0 0 6px}
 </style>
 </head>
 <body>
 
 <header>
-  <h1>🍅 収穫色目表<small>色目 1〜5 の数字で収穫指示を出すための基準表</small></h1>
-  <a class="back" href="./index.html">← トマトサイザーへ</a>
+  <h1><span data-t="title"></span><small data-t="sub"></small></h1>
+  <a class="back" href="./index.html">← トマトサイザー</a>
 </header>
 
+<div class="langs no-print">
+  <button class="lang" data-l="ja" onclick="setLang('ja')">日本語</button>
+  <button class="lang" data-l="th" onclick="setLang('th')">ไทย</button>
+  <button class="lang" data-l="id" onclick="setLang('id')">Indonesia</button>
+</div>
+
 <div class="tabs no-print">
-  <button class="tab active" data-v="large" onclick="setVariety('large')">大玉トマト</button>
-  <button class="tab" data-v="mini" onclick="setVariety('mini')">ミニトマト</button>
+  <button class="tab active" data-v="large" onclick="setVariety('large')"></button>
+  <button class="tab" data-v="mini" onclick="setVariety('mini')"></button>
 </div>
 
-<div class="rule">
-  <b>見かた：</b>色は<b>お尻（花のあった側）から先に</b>付き、<b>ヘタ側（肩）が最後</b>に赤くなります。肩の色を見て番号を決めてください。<br>
-  <b>迷ったら：</b>2つの番号の間で迷ったら<b>「低いほうの番号」</b>とみなします。
-</div>
+<div class="rule screen"><b data-t="howH"></b><span data-t="how"></span><br><b data-t="doubtH"></b><span data-t="doubt"></span></div>
 
-<!-- 画面表示用（品種切り替え） -->
-<div class="no-print">
-  <div class="grid" id="grid"></div>
-</div>
+<!-- 画面表示用 -->
+<div class="no-print"><div class="grid" id="grid"></div></div>
 
-<!-- 印刷用（両品種を1枚ずつ） -->
+<!-- 印刷用（3か国語・両品種を1枚ずつ） -->
 <div class="print-only">
-  <div class="sheet"><h3>大玉トマト 収穫色目表</h3><div class="grid" id="print-large"></div></div>
-  <div class="sheet"><h3>ミニトマト 収穫色目表</h3><div class="grid" id="print-mini"></div></div>
+  <div class="sheet"><h3 id="ph-large"></h3><div class="rule" id="pr-large"></div><div class="grid" id="print-large"></div></div>
+  <div class="sheet"><h3 id="ph-mini"></h3><div class="rule" id="pr-mini"></div><div class="grid" id="print-mini"></div></div>
 </div>
 
-<!-- 指示メッセージ作成 -->
+<!-- 指示メッセージ作成（社員用・日本語） -->
 <section class="panel">
-  <h2>📣 収穫指示メッセージを作る</h2>
+  <h2>📣 収穫指示メッセージを作る<span class="tag">社員用</span></h2>
   <div class="row"><label for="d">収穫日</label><input type="date" id="d"></div>
-  <div class="row"><label for="lvL">大玉</label>
-    <select id="lvL"></select>
+  <div class="row"><label for="lvL">大玉</label><select id="lvL"></select></div>
+  <div class="row"><label for="lvM">ミニ</label><select id="lvM"></select></div>
+  <div class="row"><label>言語</label>
+    <label class="chk"><input type="checkbox" class="ml-chk" value="ja" checked>日本語</label>
+    <label class="chk"><input type="checkbox" class="ml-chk" value="th" checked>タイ語</label>
+    <label class="chk"><input type="checkbox" class="ml-chk" value="id" checked>インドネシア語</label>
   </div>
-  <div class="row"><label for="lvM">ミニ</label>
-    <select id="lvM"></select>
-  </div>
-  <div class="row"><label for="memo">補足</label><input type="text" id="memo" placeholder="例：1号ハウスから。割れ果は別コンテナへ"></div>
+  <div class="row"><label for="memo">補足</label><input type="text" id="memo" placeholder="例：1号ハウスから（※翻訳されずそのまま付きます）"></div>
   <textarea id="out" readonly></textarea>
   <div class="btns">
     <button class="b" onclick="copyMsg()" id="copyBtn">📋 コピー（LINE等に貼り付け）</button>
-    <button class="b sub" onclick="window.print()">🖨 色目表を印刷（A4横・2枚）</button>
+    <button class="b sub" onclick="window.print()">🖨 色目表を印刷（A4横・2枚・3か国語）</button>
   </div>
 </section>
 
 <section class="panel">
-  <h2>📝 運用メモ</h2>
+  <h2>📝 運用メモ<span class="tag">社員用</span></h2>
   <ul class="notes">
     <li>画面や印刷の色は機種・プリンターで変わります。<b>最初に実物のトマトと並べて、各番号の見本を社員で確認</b>してから使ってください。</li>
     <li>できれば各番号の<b>実物写真（自農園の品種）</b>を撮って差し替えると、ブレがさらに小さくなります。</li>
     <li>使い分けの一例（※要現場調整）：高温期は収穫後も色が進むため1段階低めに、直売・近距離出荷は高め（4〜5）に。</li>
     <li>大玉はピンク系品種（桃太郎系など）を想定した色です。赤系品種の場合は色見本を調整してください。</li>
+    <li>タイ語・インドネシア語の訳は<b>ネイティブ確認前</b>です。導入前に、各国のスタッフに一度読んでもらい、分かりにくい言い回しを直してください。</li>
+    <li>言語を固定したリンクを配れます：<code>color-chart.html?lang=th</code>（タイ語）／<code>?lang=id</code>（インドネシア語）</li>
   </ul>
 </section>
 
 <script>
+// ===== 画面の文言（3か国語） =====
+// ※タイ語・インドネシア語はネイティブ確認前の訳です
+const UI = {
+  ja:{title:'🍅 収穫色目表',sub:'色目 1〜5 の数字で収穫指示を出すための基準表',
+      large:'大玉トマト',mini:'ミニトマト',
+      howH:'見かた：',how:'色はお尻（花のあった側）から先に付き、ヘタ側（肩）が最後に赤くなります。ヘタ側の色を見て番号を決めてください。',
+      doubtH:'迷ったら：',doubt:'2つの番号の間で迷ったら「低いほうの番号」とみなします。',
+      ok:'収穫OK',use:'目安：',pct:p=>`着色 約${p}`,sheet:'収穫色目表'},
+  th:{title:'🍅 ตารางระดับสีเก็บเกี่ยว',sub:'ใช้ตัวเลขระดับสี 1–5 ในการสั่งเก็บเกี่ยว',
+      large:'มะเขือเทศผลใหญ่',mini:'มะเขือเทศเชอร์รี่',
+      howH:'วิธีดู: ',how:'สีจะเริ่มเปลี่ยนจากก้นผล (ด้านปลาย) ก่อน และด้านขั้วผลจะแดงเป็นที่สุดท้าย ให้ดูสีที่ด้านขั้วผลเพื่อกำหนดระดับ',
+      doubtH:'ถ้าไม่แน่ใจ: ',doubt:'ถ้าลังเลระหว่าง 2 ระดับ ให้ถือเป็น "ระดับที่ต่ำกว่า"',
+      ok:'เก็บได้',use:'ใช้สำหรับ: ',pct:p=>`สีประมาณ ${p}`,sheet:'ตารางระดับสีเก็บเกี่ยว'},
+  id:{title:'🍅 Tabel Warna Panen',sub:'Perintah panen memakai angka warna 1–5',
+      large:'Tomat besar',mini:'Tomat mini',
+      howH:'Cara melihat: ',how:'Warna mulai dari bagian bawah buah (ujung), dan bagian dekat tangkai paling akhir menjadi merah. Lihat warna di dekat tangkai untuk menentukan angka.',
+      doubtH:'Jika ragu: ',doubt:'Jika ragu di antara 2 angka, anggap "angka yang lebih rendah".',
+      ok:'Panen OK',use:'Untuk: ',pct:p=>`Warna ± ${p}`,sheet:'Tabel Warna Panen'},
+};
+
 // ===== 色目の定義 =====
 // p: お尻から何割が色づいているか / tip: 色づき部分の色 / green: 未着色部分の色
 const DATA = {
   large: {
-    label: '大玉トマト',
     green: '#a9c46c',
     levels: [
-      {name:'催色期', pct:'着色 1〜2割', p:.16, tip:'#f2b49b',
-       desc:'お尻の先がうっすらピンク色。全体はまだ緑白色。',
-       use:'遠方出荷・追熟前提'},
-      {name:'3分着色', pct:'着色 約3割', p:.35, tip:'#ee927c',
-       desc:'お尻から1/3くらいが淡いピンク。肩は緑。',
-       use:'市場出荷（高温期）'},
-      {name:'5分着色', pct:'着色 約5割', p:.55, tip:'#e8675e',
-       desc:'下半分がピンク〜赤。上半分は緑〜黄緑。',
-       use:'市場出荷（標準）'},
-      {name:'8分着色', pct:'着色 約8割', p:.82, tip:'#e04c4e',
-       desc:'ほぼ赤。ヘタのまわりだけ少し緑・黄色が残る。',
-       use:'近距離出荷'},
-      {name:'完熟', pct:'着色 10割', p:1, tip:'#d63b41',
-       desc:'ヘタのきわまで全体が赤い。',
-       use:'直売・自家用'},
+      {p:.16, tip:'#f2b49b', pct:'10〜20%',
+       name:{ja:'催色期',th:'เริ่มเปลี่ยนสี',id:'Mulai berubah warna'},
+       desc:{ja:'お尻の先がうっすらピンク色。全体はまだ緑白色。',
+             th:'ปลายก้นผลเริ่มเป็นสีชมพูอ่อน ทั้งผลยังเป็นสีเขียวอมขาว',
+             id:'Ujung bawah buah sedikit merah muda. Sebagian besar masih hijau keputihan.'},
+       use:{ja:'遠方出荷・追熟前提',th:'ส่งไกล (ให้สุกต่อระหว่างทาง)',id:'Kirim jauh (matang di perjalanan)'}},
+      {p:.35, tip:'#ee927c', pct:'30%',
+       name:{ja:'3分着色',th:'สี 30%',id:'Warna 30%'},
+       desc:{ja:'お尻から1/3くらいが淡いピンク。ヘタ側は緑。',
+             th:'ประมาณ 1/3 จากก้นผลเป็นสีชมพูอ่อน ด้านขั้วยังเขียว',
+             id:'Sekitar 1/3 dari bawah merah muda pucat. Dekat tangkai masih hijau.'},
+       use:{ja:'市場出荷（高温期）',th:'ส่งตลาด (ช่วงอากาศร้อน)',id:'Kirim ke pasar (musim panas)'}},
+      {p:.55, tip:'#e8675e', pct:'50%',
+       name:{ja:'5分着色',th:'สี 50%',id:'Warna 50%'},
+       desc:{ja:'下半分がピンク〜赤。上半分は緑〜黄緑。',
+             th:'ครึ่งล่างเป็นสีชมพูถึงแดง ครึ่งบนเป็นสีเขียวถึงเขียวอมเหลือง',
+             id:'Setengah bawah merah muda sampai merah. Setengah atas hijau sampai hijau kekuningan.'},
+       use:{ja:'市場出荷（標準）',th:'ส่งตลาด (มาตรฐาน)',id:'Kirim ke pasar (standar)'}},
+      {p:.82, tip:'#e04c4e', pct:'80%',
+       name:{ja:'8分着色',th:'สี 80%',id:'Warna 80%'},
+       desc:{ja:'ほぼ赤。ヘタのまわりだけ少し緑・黄色が残る。',
+             th:'เกือบแดงทั้งผล เหลือสีเขียวหรือเหลืองเล็กน้อยรอบขั้ว',
+             id:'Hampir merah semua. Hanya sekitar tangkai masih sedikit hijau/kuning.'},
+       use:{ja:'近距離出荷',th:'ส่งระยะใกล้',id:'Kirim jarak dekat'}},
+      {p:1, tip:'#d63b41', pct:'100%',
+       name:{ja:'完熟',th:'สุกเต็มที่',id:'Matang penuh'},
+       desc:{ja:'ヘタのきわまで全体が赤い。',
+             th:'แดงทั้งผลจนถึงขั้ว',
+             id:'Merah seluruhnya sampai dekat tangkai.'},
+       use:{ja:'直売・自家用',th:'ขายตรง / ใช้เอง',id:'Jual langsung / pakai sendiri'}},
     ]
   },
   mini: {
-    label: 'ミニトマト',
     green: '#93bf4c',
     levels: [
-      {name:'色づき始め', pct:'着色 2〜3割', p:.25, tip:'#f2a85a',
-       desc:'お尻側がオレンジ色に変わり始めた。',
-       use:'原則収穫しない'},
-      {name:'半分着色', pct:'着色 約5割', p:.5, tip:'#ee8040',
-       desc:'半分くらいがオレンジ〜赤。肩は黄緑。',
-       use:'遠方出荷（高温期）'},
-      {name:'7分着色', pct:'着色 約7割', p:.72, tip:'#e55a32',
-       desc:'7割が赤。ヘタ側にオレンジ〜黄緑が残る。',
-       use:'市場出荷'},
-      {name:'9分着色', pct:'着色 約9割', p:.9, tip:'#da3d2c',
-       desc:'ほぼ全体が赤。ヘタのきわが少しオレンジ。',
-       use:'市場出荷（標準）'},
-      {name:'完熟', pct:'着色 10割', p:1, tip:'#c8201f',
-       desc:'ヘタのきわまで濃い赤でツヤがある。',
-       use:'直売・自家用'},
+      {p:.25, tip:'#f2a85a', pct:'20〜30%',
+       name:{ja:'色づき始め',th:'เริ่มเปลี่ยนสี',id:'Mulai berubah warna'},
+       desc:{ja:'お尻側がオレンジ色に変わり始めた。',
+             th:'ด้านก้นผลเริ่มเปลี่ยนเป็นสีส้ม',
+             id:'Bagian bawah mulai berubah jadi oranye.'},
+       use:{ja:'原則収穫しない',th:'โดยปกติไม่เก็บ',id:'Biasanya tidak dipanen'}},
+      {p:.5, tip:'#ee8040', pct:'50%',
+       name:{ja:'半分着色',th:'สี 50%',id:'Warna 50%'},
+       desc:{ja:'半分くらいがオレンジ〜赤。ヘタ側は黄緑。',
+             th:'ประมาณครึ่งผลเป็นสีส้มถึงแดง ด้านขั้วเป็นสีเขียวอมเหลือง',
+             id:'Sekitar setengah oranye sampai merah. Dekat tangkai hijau kekuningan.'},
+       use:{ja:'遠方出荷（高温期）',th:'ส่งไกล (ช่วงอากาศร้อน)',id:'Kirim jauh (musim panas)'}},
+      {p:.72, tip:'#e55a32', pct:'70%',
+       name:{ja:'7分着色',th:'สี 70%',id:'Warna 70%'},
+       desc:{ja:'7割が赤。ヘタ側にオレンジ〜黄緑が残る。',
+             th:'แดงประมาณ 70% ด้านขั้วยังเป็นสีส้มถึงเขียวอมเหลือง',
+             id:'70% merah. Dekat tangkai masih oranye sampai hijau kekuningan.'},
+       use:{ja:'市場出荷',th:'ส่งตลาด',id:'Kirim ke pasar'}},
+      {p:.9, tip:'#da3d2c', pct:'90%',
+       name:{ja:'9分着色',th:'สี 90%',id:'Warna 90%'},
+       desc:{ja:'ほぼ全体が赤。ヘタのきわが少しオレンジ。',
+             th:'เกือบแดงทั้งผล ขอบขั้วยังเป็นสีส้มเล็กน้อย',
+             id:'Hampir merah semua. Tepat di dekat tangkai sedikit oranye.'},
+       use:{ja:'市場出荷（標準）',th:'ส่งตลาด (มาตรฐาน)',id:'Kirim ke pasar (standar)'}},
+      {p:1, tip:'#c8201f', pct:'100%',
+       name:{ja:'完熟',th:'สุกเต็มที่',id:'Matang penuh'},
+       desc:{ja:'ヘタのきわまで濃い赤でツヤがある。',
+             th:'แดงเข้มจนถึงขั้วและผิวเป็นเงา',
+             id:'Merah tua sampai dekat tangkai dan mengkilap.'},
+       use:{ja:'直売・自家用',th:'ขายตรง / ใช้เอง',id:'Jual langsung / pakai sendiri'}},
     ]
   }
 };
+for(const v in DATA) DATA[v].levels.forEach((l,i)=>l.n=i+1);
+const LANGS=['ja','th','id'];
+const TAG={ja:'JP',th:'TH',id:'ID'};
 
 function mix(a,b,t){
   const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));
@@ -200,33 +274,53 @@ function tomatoSVG(v,lv){
     ? `<path d="M60 26 C88 22 106 40 106 64 C106 92 86 108 60 108 C34 108 14 92 14 64 C14 40 32 22 60 26 Z" fill="url(#${id})"/>
        <path d="M60 28 C50 50 50 86 60 106 M40 30 C30 52 32 88 44 104 M80 30 C90 52 88 88 76 104" stroke="#000" stroke-opacity=".06" stroke-width="2" fill="none"/>`
     : `<circle cx="60" cy="68" r="38" fill="url(#${id})"/>`;
-  const topY = big?26:30;
-  return `<svg viewBox="0 0 120 116" role="img" aria-label="${DATA[v].label} 色目${lv.n}">
+  const topY = big?26:30, hx=big?42:46, hy=big?50:54;
+  return `<svg viewBox="0 0 120 116" role="img" aria-label="${lv.n}">
     <defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>
     ${body}
-    <ellipse cx="${big?42:46}" cy="${big?50:54}" rx="${big?12:9}" ry="${big?7:6}" fill="#fff" opacity=".35" transform="rotate(-30 ${big?42:46} ${big?50:54})"/>
+    <ellipse cx="${hx}" cy="${hy}" rx="${big?12:9}" ry="${big?7:6}" fill="#fff" opacity=".35" transform="rotate(-30 ${hx} ${hy})"/>
     <g fill="#3f7d2a">
-      <path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l0 0 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
+      <path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
       <rect x="57.5" y="${topY-14}" width="5" height="12" rx="2"/>
     </g>
   </svg>`;
 }
 
-function cardHTML(v,lv){
-  return `<div class="lv" data-n="${lv.n}">
+// 画面用カード（選んだ言語＋日本語名を小さく併記）
+function cardHTML(v,lv,L){
+  const u=UI[L];
+  const jp = L==='ja' ? '' : `<div class="jp">${lv.name.ja}</div>`;
+  return `<div class="lv" data-n="${lv.n}" data-ok="${u.ok}">
     <div class="head"><div class="num">${lv.n}</div>${tomatoSVG(v,lv)}</div>
     <div class="body">
-      <div class="name">${lv.name}</div><div class="pct">${lv.pct}</div>
-      <div class="desc">${lv.desc}</div>
-      <div class="use">目安：${lv.use}</div>
+      <div class="name">${lv.name[L]}</div>${jp}<div class="pct">${u.pct(lv.pct)}</div>
+      <div class="desc">${lv.desc[L]}</div>
+      <div class="use">${u.use}${lv.use[L]}</div>
     </div></div>`;
 }
-for(const v in DATA) DATA[v].levels.forEach((l,i)=>l.n=i+1);
+// 印刷用カード（3か国語を並記）
+function printCardHTML(v,lv){
+  return `<div class="lv">
+    <div class="num">${lv.n}</div>${tomatoSVG(v,lv)}
+    <div class="name">${lv.name.ja}（${lv.pct}）</div>
+    <div class="ml">${LANGS.map(L=>`<div><b>${TAG[L]}</b>${lv.desc[L]}</div>`).join('')}</div>
+  </div>`;
+}
 
-let current='large';
+// ===== 状態 =====
+let current='large', lang='ja';
+function setLang(L){
+  if(!UI[L]) L='ja';
+  lang=L;
+  try{localStorage.setItem('cc-lang',L);}catch(e){}
+  document.documentElement.lang=L;
+  document.querySelectorAll('.lang').forEach(b=>b.classList.toggle('active',b.dataset.l===L));
+  document.querySelectorAll('[data-t]').forEach(el=>el.textContent=UI[L][el.dataset.t]);
+  document.querySelectorAll('.tab').forEach(t=>t.textContent=UI[L][t.dataset.v]);
+  render();
+}
 function render(){
-  const g=document.getElementById('grid');
-  g.innerHTML=DATA[current].levels.map(l=>cardHTML(current,l)).join('');
+  document.getElementById('grid').innerHTML=DATA[current].levels.map(l=>cardHTML(current,l,lang)).join('');
   highlight();
 }
 function setVariety(v){
@@ -243,12 +337,28 @@ function highlight(){
   });
 }
 
-// ===== 指示メッセージ =====
-const WD='日月火水木金土';
+// ===== 指示メッセージ（3か国語） =====
+const MSG = {
+  ja:{wd:'日月火水木金土',rel:['本日','明日','あさって'],head:(r,d)=>`【${r}${r?' ':''}${d} 収穫指示】`,
+      date:d=>`${d.getMonth()+1}/${d.getDate()}`,
+      none:'収穫なし',lv:n=>`色目 ${n} 以上`,
+      range:n=>`→ 色目 ${n}〜5 を収穫。色目 ${n-1} 以下は残す`,
+      doubt:'※迷ったら低いほうの番号とみなしてください。'},
+  th:{wd:['อา','จ','อ','พ','พฤ','ศ','ส'],rel:['วันนี้','พรุ่งนี้','มะรืนนี้'],head:(r,d)=>`【คำสั่งเก็บเกี่ยว ${r}${r?' ':''}${d}】`,
+      date:d=>`${d.getDate()}/${d.getMonth()+1}`,
+      none:'ไม่มีการเก็บเกี่ยว',lv:n=>`ระดับสี ${n} ขึ้นไป`,
+      range:n=>`→ เก็บระดับ ${n}–5 / ระดับ ${n-1} ลงไป ไม่ต้องเก็บ`,
+      doubt:'※ถ้าไม่แน่ใจ ให้ถือเป็นระดับที่ต่ำกว่า'},
+  id:{wd:['Min','Sen','Sel','Rab','Kam','Jum','Sab'],rel:['Hari ini','Besok','Lusa'],head:(r,d)=>`【Perintah Panen ${r}${r?' ':''}${d}】`,
+      date:d=>`${d.getDate()}/${d.getMonth()+1}`,
+      none:'Tidak ada panen',lv:n=>`warna ${n} ke atas`,
+      range:n=>`→ Panen angka ${n}–5. Angka ${n-1} ke bawah jangan dipanen.`,
+      doubt:'※Jika ragu, anggap angka yang lebih rendah.'},
+};
 function fillSelect(id,v,def){
   const s=document.getElementById(id);
   s.innerHTML='<option value="0">収穫なし</option>'+DATA[v].levels.map(l=>
-    `<option value="${l.n}">色目 ${l.n} 以上（${l.name}）</option>`).join('');
+    `<option value="${l.n}">色目 ${l.n} 以上（${l.name.ja}）</option>`).join('');
   s.value=def;
   s.onchange=()=>{ setVariety(v); build(); };
 }
@@ -257,21 +367,28 @@ function build(){
   const d=dv?new Date(dv+'T00:00:00'):null;
   const today=new Date();today.setHours(0,0,0,0);
   const diff=d?Math.round((d-today)/864e5):null;
-  const rel=diff===0?'本日':diff===1?'明日':diff===2?'あさって':'';
-  const ds=d?`${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]})`:'';
-  const lines=[`【${rel}${rel?' ':''}${ds} 収穫指示】`];
-  [['lvL','large'],['lvM','mini']].forEach(([id,v])=>{
-    const n=+document.getElementById(id).value;
-    if(!n){lines.push(`■${DATA[v].label}：収穫なし`);return;}
-    const l=DATA[v].levels[n-1];
-    lines.push(`■${DATA[v].label}：色目 ${n} 以上`);
-    lines.push(`　（${l.name}＝${l.desc}）`);
-    if(n>1) lines.push(`　→ 色目 ${n}〜5 を収穫。色目 ${n-1} 以下は残す`);
+  const langs=[...document.querySelectorAll('.ml-chk:checked')].map(c=>c.value);
+  const blocks=langs.map(L=>{
+    const M=MSG[L];
+    const rel=(diff>=0&&diff<=2)?M.rel[diff]:'';
+    const ds=d?`${M.date(d)}(${M.wd[d.getDay()]})`:'';
+    const lines=[M.head(rel,ds)];
+    [['lvL','large'],['lvM','mini']].forEach(([id,v])=>{
+      const n=+document.getElementById(id).value;
+      const vn=UI[L][v];
+      const C=L==='ja'?'：':': ', O=L==='ja'?'（':'(', E=L==='ja'?'）':')';
+      if(!n){lines.push(`■${vn}${C}${M.none}`);return;}
+      const l=DATA[v].levels[n-1];
+      lines.push(`■${vn}${C}${M.lv(n)}`);
+      lines.push(`　${O}${l.desc[L]}${E}`);
+      if(n>1) lines.push(`　${M.range(n)}`);
+    });
+    lines.push(M.doubt);
+    return lines.join('\n');
   });
-  lines.push('※迷ったら低いほうの番号とみなしてください。');
   const memo=document.getElementById('memo').value.trim();
-  if(memo) lines.push('※'+memo);
-  document.getElementById('out').value=lines.join('\n');
+  if(memo) blocks.push('※'+memo);
+  document.getElementById('out').value=blocks.join('\n\n');
 }
 async function copyMsg(){
   const t=document.getElementById('out');
@@ -281,7 +398,7 @@ async function copyMsg(){
   setTimeout(()=>b.textContent='📋 コピー（LINE等に貼り付け）',1500);
 }
 
-// 初期化
+// ===== 初期化 =====
 (function(){
   const t=new Date();t.setDate(t.getDate()+1);
   const pad=n=>String(n).padStart(2,'0');
@@ -289,11 +406,20 @@ async function copyMsg(){
   dEl.value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
   dEl.onchange=build;
   document.getElementById('memo').oninput=build;
+  document.querySelectorAll('.ml-chk').forEach(c=>c.onchange=build);
   fillSelect('lvL','large','3');
   fillSelect('lvM','mini','4');
-  document.getElementById('print-large').innerHTML=DATA.large.levels.map(l=>cardHTML('large',l)).join('');
-  document.getElementById('print-mini').innerHTML=DATA.mini.levels.map(l=>cardHTML('mini',l)).join('');
-  render();build();
+  // 印刷用（3か国語）
+  ['large','mini'].forEach(v=>{
+    document.getElementById('ph-'+v).textContent=LANGS.map(L=>`${UI[L][v]} ${UI[L].sheet}`).join('　/　');
+    document.getElementById('pr-'+v).innerHTML=LANGS.map(L=>`<div><b>${UI[L].howH}</b>${UI[L].how}　<b>${UI[L].doubtH}</b>${UI[L].doubt}</div>`).join('');
+    document.getElementById('print-'+v).innerHTML=DATA[v].levels.map(l=>printCardHTML(v,l)).join('');
+  });
+  // 言語：URL ?lang= ＞ 前回の選択 ＞ 日本語
+  let L=new URLSearchParams(location.search).get('lang');
+  if(!L){try{L=localStorage.getItem('cc-lang');}catch(e){}}
+  setLang(L||'ja');
+  build();
 })();
 </script>
 </body>
