@@ -28,7 +28,12 @@ h1{font-size:22px;font-weight:900}
 .lv:active{transform:scale(.97)}
 .lv .ok{position:absolute;top:6px;right:8px;font-size:34px;line-height:1;display:none}
 .lv .num{font-size:48px;font-weight:900;line-height:1}
-.lv svg{width:100%;max-width:150px;display:block;margin:4px auto 0}
+/* 写真があれば写真、なければイラストを表示 */
+.pic{width:100%;max-width:150px;aspect-ratio:1;margin:4px auto 0}
+.pic svg,.pic img{width:100%;height:100%;display:block}
+.pic img{display:none;object-fit:cover;border-radius:12px}
+.pic.has img{display:block}
+.pic.has svg{display:none}
 .lv.on{border-color:var(--ok);background:#f1f8f1}
 .lv.on .ok{display:block;animation:pop .25s ease}
 @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
@@ -52,7 +57,7 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .lv .ok{top:50%;right:18px;transform:translateY(-50%);font-size:40px}
   .lv.on .ok{animation:none}
   .lv .num{font-size:52px;width:48px}
-  .lv svg{width:104px;margin:0}
+  .pic{width:104px;margin:0}
   .scale{gap:6px}
   .date{font-size:22px;padding:6px}
   header{margin-bottom:8px}
@@ -68,7 +73,7 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .lv{opacity:1!important;filter:none!important;border-color:#bbb!important;background:#fff!important;padding:4px}
   .lv .ok{display:none!important}
   .lv .num{font-size:56px}
-  .lv svg{max-width:175px}
+  .pic{max-width:175px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -146,7 +151,11 @@ function tomatoSVG(v,lv){
     <g fill="#3f7d2a"><path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
     <rect x="57.5" y="${topY-14}" width="5" height="12" rx="2"/></g></svg>`;
 }
-const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div>${tomatoSVG(v,l)}<span class="ok">👍</span></div>`).join('');
+// 写真ファイル：photos/large-1.jpg 〜 large-5.jpg、photos/mini-1.jpg 〜 mini-5.jpg
+// 読み込めた番号だけ写真に切り替わる（無い番号はイラストのまま）
+const PHOTO_VER='1'; // 写真を差し替えたら数字を上げると、古い写真が残らない
+const photo=(v,n)=>`<img src="photos/${v}-${n}.jpg?v=${PHOTO_VER}" alt="" draggable="false" onload="this.parentNode.classList.add('has')">`;
+const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div><div class="pic">${photo(v,i+1)}${tomatoSVG(v,l)}</div><span class="ok">👍</span></div>`).join('');
 
 // 収穫OKにした番号（品種ごと）
 const picked={large:new Set(),mini:new Set()};
