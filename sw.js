@@ -1,7 +1,8 @@
-const CACHE_NAME = 'tomato-sizer-v1';
+const CACHE_NAME = 'tomato-sizer-v3';
 const ASSETS = [
   './',
   './index.html',
+  './color-chart.html',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;600;700;900&display=swap'
 ];

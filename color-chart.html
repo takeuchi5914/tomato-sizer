@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f3f1ec">
+<title>収穫色目表</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@700;900&family=Noto+Sans+Thai:wght@700&display=swap">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+/* 色の見え方を変えないよう、背景は無彩色に近いグレー */
+:root{--bg:#f3f1ec;--card:#fff;--line:#dedad2;--text:#222;--muted:#77716a;--accent:#c0392b;--ok:#2e7d32}
+html,body{font-family:'Hiragino Sans','Noto Sans JP','Noto Sans Thai','Meiryo',sans-serif;background:var(--bg);color:var(--text)}
+body{max-width:960px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+h1{font-size:22px;font-weight:900}
+.back{font-size:13px;color:var(--muted);text-decoration:none}
+/* 日付：当日のみ表示（変更不可）。スクショに写るよう大きく */
+.date{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:8px;margin-bottom:10px;font-size:26px;font-weight:900;letter-spacing:1px}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tab{flex:1;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:var(--card);font:inherit;font-weight:800;color:var(--muted);cursor:pointer;line-height:1.3}
+.tab b{display:block;font-size:18px}
+.tab small{font-size:12px}
+.tab.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+.lv{position:relative;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s,filter .2s,border-color .2s,transform .1s}
+.lv:active{transform:scale(.97)}
+.lv .ok{position:absolute;top:6px;right:8px;font-size:34px;line-height:1;display:none}
+.lv .num{font-size:48px;font-weight:900;line-height:1}
+/* 写真があれば写真、なければイラストを表示 */
+.pic{width:100%;max-width:150px;aspect-ratio:1;margin:4px auto 0}
+.pic svg,.pic img{width:100%;height:100%;display:block}
+.pic img{display:none;object-fit:cover;border-radius:12px}
+.pic.has img{display:block}
+.pic.has svg{display:none}
+.lv.on{border-color:var(--ok);background:#f1f8f1}
+.lv.on .ok{display:block;animation:pop .25s ease}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+/* 1つでもタップされたら、タップしていない番号は薄暗く */
+.scale.picked .lv:not(.on){opacity:.3;filter:brightness(.75)}
+.hint{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
+details{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+summary{font-weight:800;cursor:pointer;color:var(--muted)}
+.row{display:flex;align-items:center;gap:10px;margin-top:12px}
+.row label{font-weight:700;min-width:4em}
+select,input{font:inherit;font-size:16px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;padding:10px;border:1px solid var(--line);border-radius:10px;min-height:110px;background:#fafafa}
+.btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btns button{font:inherit;font-weight:800;padding:12px 16px;border-radius:12px;border:none;cursor:pointer;background:var(--accent);color:#fff}
+.btns button.sub{background:#fff;color:var(--text);border:2px solid var(--line)}
+.print-only{display:none}
+/* スマホ：縦に並べて大きく見せる */
+@media (max-width:640px){
+  .scale{grid-template-columns:1fr;gap:8px}
+  .lv{display:flex;align-items:center;justify-content:center;gap:28px;padding:6px 12px}
+  .lv .ok{top:50%;right:18px;transform:translateY(-50%);font-size:40px}
+  .lv.on .ok{animation:none}
+  .lv .num{font-size:52px;width:48px}
+  .pic{width:104px;margin:0}
+  .scale{gap:6px}
+  .date{font-size:22px;padding:6px}
+  header{margin-bottom:8px}
+}
+@media print{
+  @page{size:A4 landscape;margin:10mm}
+  html,body{background:#fff}
+  body{max-width:none;padding:0}
+  .screen{display:none!important}
+  .print-only{display:block}
+  .print-only h2{font-size:22px;margin:4px 0 6px}
+  .print-only .scale{margin-bottom:14px}
+  .lv{opacity:1!important;filter:none!important;border-color:#bbb!important;background:#fff!important;padding:4px}
+  .lv .ok{display:none!important}
+  .lv .num{font-size:56px}
+  .pic{max-width:175px}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+
+<div class="screen">
+  <header>
+    <h1>🍅 収穫色目表</h1>
+    <a class="back" href="./index.html">← トマトサイザー</a>
+  </header>
+
+  <div class="date">📅 <span id="dateText"></span></div>
+
+  <div class="tabs">
+    <button class="tab active" data-v="large" onclick="setVariety('large')"><b>大玉トマト</b><small>ผลใหญ่ / Besar</small></button>
+    <button class="tab" data-v="mini" onclick="setVariety('mini')"><b>ミニトマト</b><small>เชอร์รี่ / Mini</small></button>
+  </div>
+
+  <div class="scale" id="scale"></div>
+  <p class="hint">👆 タップ / แตะ / Ketuk</p>
+
+  <!-- 社員用：ふだんは閉じておく -->
+  <details>
+    <summary>社員用：収穫指示を作る</summary>
+    <textarea id="out" readonly></textarea>
+    <div class="btns">
+      <button onclick="copyMsg()" id="copyBtn">📋 コピー</button>
+      <button class="sub" onclick="clearAll()">クリア</button>
+      <button class="sub" onclick="window.print()">🖨 印刷</button>
+    </div>
+  </details>
+</div>
+
+<!-- 印刷用：A4横1枚に大玉とミニ -->
+<div class="print-only">
+  <h2>大玉トマト / ผลใหญ่ / Besar</h2><div class="scale" id="p-large"></div>
+  <h2>ミニトマト / เชอร์รี่ / Mini</h2><div class="scale" id="p-mini"></div>
+</div>
+
+<script>
+// ===== 色目の定義 =====
+// p: お尻から何割が色づいているか / tip: 色づき部分の色 / green: 未着色部分の色
+const DATA = {
+  large:{green:'#a9c46c',levels:[
+    {p:.16,tip:'#f2b49b'},{p:.35,tip:'#ee927c'},{p:.55,tip:'#e8675e'},{p:.82,tip:'#e04c4e'},{p:1,tip:'#d63b41'}]},
+  mini:{green:'#93bf4c',levels:[
+    {p:.25,tip:'#f2a85a'},{p:.5,tip:'#ee8040'},{p:.72,tip:'#e55a32'},{p:.9,tip:'#da3d2c'},{p:1,tip:'#c8201f'}]},
+};
+
+function mix(a,b,t){
+  const h=s=>[1,3,5].map(i=>parseInt(s.slice(i,i+2),16));
+  const A=h(a),B=h(b);
+  return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');
+}
+let uid=0;
+function tomatoSVG(v,lv){
+  const id='g'+(uid++), G=DATA[v].green, p=lv.p;
+  // 下（お尻）から上（ヘタ）へ色づく
+  const stops = p>=1
+    ? `<stop offset="0" stop-color="${lv.tip}"/><stop offset="1" stop-color="${mix(lv.tip,'#000000',.08)}"/>`
+    : `<stop offset="0" stop-color="${lv.tip}"/><stop offset="${(p*.65).toFixed(2)}" stop-color="${lv.tip}"/>
+       <stop offset="${p.toFixed(2)}" stop-color="${mix(lv.tip,G,.5)}"/><stop offset="${Math.min(1,p+.14).toFixed(2)}" stop-color="${G}"/>
+       <stop offset="1" stop-color="${G}"/>`;
+  const big=v==='large';
+  const body=big
+    ? `<path d="M60 26 C88 22 106 40 106 64 C106 92 86 108 60 108 C34 108 14 92 14 64 C14 40 32 22 60 26 Z" fill="url(#${id})"/>
+       <path d="M60 28 C50 50 50 86 60 106 M40 30 C30 52 32 88 44 104 M80 30 C90 52 88 88 76 104" stroke="#000" stroke-opacity=".06" stroke-width="2" fill="none"/>`
+    : `<circle cx="60" cy="68" r="38" fill="url(#${id})"/>`;
+  const topY=big?26:30, hx=big?42:46, hy=big?50:54;
+  return `<svg viewBox="0 0 120 116" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="1" x2="0" y2="0">${stops}</linearGradient></defs>
+    ${body}
+    <ellipse cx="${hx}" cy="${hy}" rx="${big?12:9}" ry="${big?7:6}" fill="#fff" opacity=".35" transform="rotate(-30 ${hx} ${hy})"/>
+    <g fill="#3f7d2a"><path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
+    <rect x="57.5" y="${topY-14}" width="5" height="12" rx="2"/></g></svg>`;
+}
+// 写真ファイル：photos/large-1.jpg 〜 large-5.jpg、photos/mini-1.jpg 〜 mini-5.jpg
+// 読み込めた番号だけ写真に切り替わる（無い番号はイラストのまま）
+const PHOTO_VER='1'; // 写真を差し替えたら数字を上げると、古い写真が残らない
+const photo=(v,n)=>`<img src="photos/${v}-${n}.jpg?v=${PHOTO_VER}" alt="" draggable="false" onload="this.parentNode.classList.add('has')">`;
+const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div><div class="pic">${photo(v,i+1)}${tomatoSVG(v,l)}</div><span class="ok">👍</span></div>`).join('');
+
+// 収穫OKにした番号（品種ごと）
+const picked={large:new Set(),mini:new Set()};
+let current='large';
+function setVariety(v){
+  current=v;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
+  const sc=document.getElementById('scale');
+  sc.innerHTML=cards(v,true);
+  sc.querySelectorAll('.lv').forEach(c=>{
+    c.onclick=()=>toggle(+c.dataset.n);
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(+c.dataset.n);}};
+  });
+  paint();
+}
+// タップで 👍 を付けたり外したり
+function toggle(n){
+  const s=picked[current];
+  s.has(n)?s.delete(n):s.add(n);
+  paint();build();
+}
+function paint(){
+  const s=picked[current], sc=document.getElementById('scale');
+  sc.classList.toggle('picked',s.size>0);
+  sc.querySelectorAll('.lv').forEach(c=>{
+    const on=s.has(+c.dataset.n);
+    c.classList.toggle('on',on);
+    c.setAttribute('aria-pressed',on);
+  });
+}
+function clearAll(){picked.large.clear();picked.mini.clear();paint();build();}
+
+// 当日の日付（2026/11/20 形式）
+function todayText(){
+  const t=new Date(), pad=n=>String(n).padStart(2,'0');
+  return `${t.getFullYear()}/${pad(t.getMonth()+1)}/${pad(t.getDate())}`;
+}
+
+// ===== 指示メッセージ：👍 を付けた番号だけ =====
+function build(){
+  const ds=todayText()+' ';
+  const line=(label,v)=>picked[v].size?`${label}：${[...picked[v]].sort().join(' ')}`:null;
+  const body=[line('大玉トマト / ผลใหญ่ / Besar','large'),line('ミニトマト / เชอร์รี่ / Mini','mini')].filter(Boolean);
+  document.getElementById('out').value=body.length
+    ? [`【${ds}収穫 / เก็บ / Panen】`,...body].join('\n')
+    : '';
+  document.getElementById('out').placeholder='上のトマトをタップすると、ここに指示文ができます';
+}
+async function copyMsg(){
+  const t=document.getElementById('out');
+  try{await navigator.clipboard.writeText(t.value);}catch(e){t.select();document.execCommand('copy');}
+  const b=document.getElementById('copyBtn');b.textContent='✅ コピーしました';
+  setTimeout(()=>b.textContent='📋 コピー',1500);
+}
+
+(function(){
+  // 日付：当日のみ。画面に戻ったときも更新（日付をまたいで開きっぱなしの場合に備える）
+  const showDate=()=>{document.getElementById('dateText').textContent=todayText();build();};
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)showDate();});
+  showDate();
+  document.getElementById('p-large').innerHTML=cards('large',false);
+  document.getElementById('p-mini').innerHTML=cards('mini',false);
+  setVariety('large');build();
+})();
+</script>
+</body>
+</html>
