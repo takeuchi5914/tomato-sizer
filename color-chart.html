@@ -171,10 +171,12 @@ function setVariety(v){
   });
   paint();
 }
-// タップで 👍 を付けたり外したり
+// タップした番号〜5 にまとめて 👍。いま一番下の番号をもう一度タップすると全部外す
 function toggle(n){
   const s=picked[current];
-  s.has(n)?s.delete(n):s.add(n);
+  const min=s.size?Math.min(...s):0;
+  s.clear();
+  if(n!==min) for(let k=n;k<=5;k++) s.add(k);
   paint();build();
 }
 function paint(){
