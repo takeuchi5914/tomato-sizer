@@ -84,8 +84,8 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   <div class="date">📅 <span id="dateText"></span></div>
 
   <div class="tabs">
-    <button class="tab active" data-v="large" onclick="setVariety('large')"><b>大玉</b><small>ผลใหญ่ / Besar</small></button>
-    <button class="tab" data-v="mini" onclick="setVariety('mini')"><b>ミニ</b><small>เชอร์รี่ / Mini</small></button>
+    <button class="tab active" data-v="large" onclick="setVariety('large')"><b>大玉トマト</b><small>ผลใหญ่ / Besar</small></button>
+    <button class="tab" data-v="mini" onclick="setVariety('mini')"><b>ミニトマト</b><small>เชอร์รี่ / Mini</small></button>
   </div>
 
   <div class="scale" id="scale"></div>
@@ -105,8 +105,8 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
 
 <!-- 印刷用：A4横1枚に大玉とミニ -->
 <div class="print-only">
-  <h2>大玉 / ผลใหญ่ / Besar</h2><div class="scale" id="p-large"></div>
-  <h2>ミニ / เชอร์รี่ / Mini</h2><div class="scale" id="p-mini"></div>
+  <h2>大玉トマト / ผลใหญ่ / Besar</h2><div class="scale" id="p-large"></div>
+  <h2>ミニトマト / เชอร์รี่ / Mini</h2><div class="scale" id="p-mini"></div>
 </div>
 
 <script>
@@ -189,7 +189,7 @@ function todayText(){
 function build(){
   const ds=todayText()+' ';
   const line=(label,v)=>picked[v].size?`${label}：${[...picked[v]].sort().join(' ')}`:null;
-  const body=[line('大玉 / ผลใหญ่ / Besar','large'),line('ミニ / เชอร์รี่ / Mini','mini')].filter(Boolean);
+  const body=[line('大玉トマト / ผลใหญ่ / Besar','large'),line('ミニトマト / เชอร์รี่ / Mini','mini')].filter(Boolean);
   document.getElementById('out').value=body.length
     ? [`【${ds}収穫 / เก็บ / Panen】`,...body].join('\n')
     : '';
