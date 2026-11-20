@@ -22,11 +22,17 @@ h1{font-size:22px;font-weight:900}
 .tab small{font-size:12px}
 .tab.active{border-color:var(--accent);background:var(--accent);color:#fff}
 .scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
-.lv{background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center;transition:opacity .2s,border-color .2s}
+.lv{position:relative;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s,filter .2s,border-color .2s,transform .1s}
+.lv:active{transform:scale(.97)}
+.lv .ok{position:absolute;top:6px;right:8px;font-size:34px;line-height:1;display:none}
 .lv .num{font-size:48px;font-weight:900;line-height:1}
 .lv svg{width:100%;max-width:150px;display:block;margin:4px auto 0}
-.lv.on{border-color:var(--ok)}
-.lv.dim{opacity:.3}
+.lv.on{border-color:var(--ok);background:#f1f8f1}
+.lv.on .ok{display:block;animation:pop .25s ease}
+@keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
+/* 1つでもタップされたら、タップしていない番号は薄暗く */
+.scale.picked .lv:not(.on){opacity:.3;filter:brightness(.75)}
+.hint{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
 details{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
 summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .row{display:flex;align-items:center;gap:10px;margin-top:12px}
@@ -41,6 +47,8 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
 @media (max-width:640px){
   .scale{grid-template-columns:1fr;gap:8px}
   .lv{display:flex;align-items:center;justify-content:center;gap:28px;padding:6px 12px}
+  .lv .ok{top:50%;right:18px;transform:translateY(-50%);font-size:40px}
+  .lv.on .ok{animation:none}
   .lv .num{font-size:52px;width:48px}
   .lv svg{width:120px;margin:0}
 }
@@ -52,7 +60,8 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .print-only{display:block}
   .print-only h2{font-size:22px;margin:4px 0 6px}
   .print-only .scale{margin-bottom:14px}
-  .lv{opacity:1!important;border-color:#bbb!important;padding:4px}
+  .lv{opacity:1!important;filter:none!important;border-color:#bbb!important;background:#fff!important;padding:4px}
+  .lv .ok{display:none!important}
   .lv .num{font-size:56px}
   .lv svg{max-width:175px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
@@ -73,16 +82,16 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   </div>
 
   <div class="scale" id="scale"></div>
+  <p class="hint">👆 タップ / แตะ / Ketuk</p>
 
   <!-- 社員用：ふだんは閉じておく -->
   <details>
     <summary>社員用：収穫指示を作る</summary>
     <div class="row"><label for="d">日付</label><input type="date" id="d"></div>
-    <div class="row"><label for="lvL">大玉</label><select id="lvL"></select></div>
-    <div class="row"><label for="lvM">ミニ</label><select id="lvM"></select></div>
     <textarea id="out" readonly></textarea>
     <div class="btns">
       <button onclick="copyMsg()" id="copyBtn">📋 コピー</button>
+      <button class="sub" onclick="clearAll()">クリア</button>
       <button class="sub" onclick="window.print()">🖨 印刷</button>
     </div>
   </details>
@@ -131,46 +140,50 @@ function tomatoSVG(v,lv){
     <g fill="#3f7d2a"><path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
     <rect x="57.5" y="${topY-14}" width="5" height="12" rx="2"/></g></svg>`;
 }
-const cards=v=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"><div class="num">${i+1}</div>${tomatoSVG(v,l)}</div>`).join('');
+const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div>${tomatoSVG(v,l)}<span class="ok">👍</span></div>`).join('');
 
+// 収穫OKにした番号（品種ごと）
+const picked={large:new Set(),mini:new Set()};
 let current='large';
 function setVariety(v){
   current=v;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
-  document.getElementById('scale').innerHTML=cards(v);
-  highlight();
+  const sc=document.getElementById('scale');
+  sc.innerHTML=cards(v,true);
+  sc.querySelectorAll('.lv').forEach(c=>{
+    c.onclick=()=>toggle(+c.dataset.n);
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(+c.dataset.n);}};
+  });
+  paint();
 }
-// 社員が指示を選ぶと、収穫する番号を緑枠、残す番号を薄く表示
-function highlight(){
-  const sel=+document.getElementById(current==='large'?'lvL':'lvM').value;
-  document.querySelectorAll('#scale .lv').forEach(c=>{
-    const n=+c.dataset.n;
-    c.classList.toggle('on',sel>0&&n>=sel);
-    c.classList.toggle('dim',sel>0&&n<sel);
+// タップで 👍 を付けたり外したり
+function toggle(n){
+  const s=picked[current];
+  s.has(n)?s.delete(n):s.add(n);
+  paint();build();
+}
+function paint(){
+  const s=picked[current], sc=document.getElementById('scale');
+  sc.classList.toggle('picked',s.size>0);
+  sc.querySelectorAll('.lv').forEach(c=>{
+    const on=s.has(+c.dataset.n);
+    c.classList.toggle('on',on);
+    c.setAttribute('aria-pressed',on);
   });
 }
+function clearAll(){picked.large.clear();picked.mini.clear();paint();build();}
 
-// ===== 指示メッセージ：数字だけで短く =====
+// ===== 指示メッセージ：👍 を付けた番号だけ =====
 const WD='日月火水木金土';
-function fillSelect(id,v,def){
-  const s=document.getElementById(id);
-  s.innerHTML='<option value="0">―</option><option value="-1">収穫なし</option>'+
-    [1,2,3,4,5].map(n=>`<option value="${n}">${n} 以上</option>`).join('');
-  s.value=def;
-  s.onchange=()=>{setVariety(v);build();};
-}
 function build(){
   const dv=document.getElementById('d').value, d=dv?new Date(dv+'T00:00:00'):null;
   const ds=d?`${d.getMonth()+1}/${d.getDate()}(${WD[d.getDay()]}) `:'';
-  const line=(label,id)=>{
-    const n=+document.getElementById(id).value;
-    if(n===0) return null;
-    return `${label}：${n<0?'✕':[1,2,3,4,5].filter(k=>k>=n).join(' ')}`;
-  };
-  const lines=[`【${ds}収穫 / เก็บ / Panen】`,
-    line('大玉 / ผลใหญ่ / Besar','lvL'),
-    line('ミニ / เชอร์รี่ / Mini','lvM')].filter(Boolean);
-  document.getElementById('out').value=lines.join('\n');
+  const line=(label,v)=>picked[v].size?`${label}：${[...picked[v]].sort().join(' ')}`:null;
+  const body=[line('大玉 / ผลใหญ่ / Besar','large'),line('ミニ / เชอร์รี่ / Mini','mini')].filter(Boolean);
+  document.getElementById('out').value=body.length
+    ? [`【${ds}収穫 / เก็บ / Panen】`,...body].join('\n')
+    : '';
+  document.getElementById('out').placeholder='上のトマトをタップすると、ここに指示文ができます';
 }
 async function copyMsg(){
   const t=document.getElementById('out');
@@ -185,10 +198,8 @@ async function copyMsg(){
   const dEl=document.getElementById('d');
   dEl.value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;
   dEl.onchange=build;
-  fillSelect('lvL','large','0');
-  fillSelect('lvM','mini','0');
-  document.getElementById('p-large').innerHTML=cards('large');
-  document.getElementById('p-mini').innerHTML=cards('mini');
+  document.getElementById('p-large').innerHTML=cards('large',false);
+  document.getElementById('p-mini').innerHTML=cards('mini',false);
   setVariety('large');build();
 })();
 </script>
