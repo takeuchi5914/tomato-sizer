@@ -5,10 +5,12 @@
 
 ## ファイル名（この名前で入れてください）
 
-| | 1 | 2 | 3 | 4 | 5 |
-|---|---|---|---|---|---|
-| 大玉トマト | large-1.jpg | large-2.jpg | large-3.jpg | large-4.jpg | large-5.jpg |
-| ミニトマト | mini-1.jpg | mini-2.jpg | mini-3.jpg | mini-4.jpg | mini-5.jpg |
+| | 1 | 2 | 3 | 4 | 5 | 6 |
+|---|---|---|---|---|---|---|
+| 大玉トマト（5段階） | large-1.jpg | large-2.jpg | large-3.jpg | large-4.jpg | large-5.jpg | － |
+| ミニトマト（6段階） | mini-1.jpg | mini-2.jpg | mini-3.jpg | mini-4.jpg | mini-5.jpg | mini-6.jpg |
+
+ミニトマトの写真は、静岡県野菜振興協会トマト部会「ミニトマト カラーチャート表」の❷〜❼を使っています（色目1＝❷ … 色目6＝❼）。
 
 - 拡張子は小文字の `.jpg`（`.JPG` や `.png` は表示されません）
 - 正方形に自動で切り抜かれます。トマトを写真の真ん中に

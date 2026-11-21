@@ -23,7 +23,8 @@ h1{font-size:22px;font-weight:900}
 .tab b{display:block;font-size:18px}
 .tab small{font-size:12px}
 .tab.active{border-color:var(--accent);background:var(--accent);color:#fff}
-.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+/* 段階の数（大玉5・ミニ6）は --n で切り替え */
+.scale{display:grid;grid-template-columns:repeat(var(--n,5),1fr);gap:10px}
 .lv{position:relative;background:var(--card);border:3px solid var(--line);border-radius:16px;padding:10px 6px;text-align:center;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .2s,filter .2s,border-color .2s,transform .1s}
 .lv:active{transform:scale(.97)}
 .lv .ok{position:absolute;top:6px;right:8px;font-size:34px;line-height:1;display:none}
@@ -59,6 +60,10 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .lv .num{font-size:52px;width:48px}
   .pic{width:104px;margin:0}
   .scale{gap:6px}
+  /* 6段階のときも1画面に収まるよう小さめに */
+  .scale.six .pic{width:84px}
+  .scale.six .lv{padding:3px 12px}
+  .scale.six .lv .num{font-size:46px}
   .date{font-size:22px;padding:6px}
   header{margin-bottom:8px}
 }
@@ -120,8 +125,9 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
 const DATA = {
   large:{green:'#a9c46c',levels:[
     {p:.16,tip:'#f2b49b'},{p:.35,tip:'#ee927c'},{p:.55,tip:'#e8675e'},{p:.82,tip:'#e04c4e'},{p:1,tip:'#d63b41'}]},
+  // ミニは静岡県野菜振興協会トマト部会カラーチャートの❷〜❼に合わせて6段階（写真が無いときのイラスト用）
   mini:{green:'#93bf4c',levels:[
-    {p:.25,tip:'#f2a85a'},{p:.5,tip:'#ee8040'},{p:.72,tip:'#e55a32'},{p:.9,tip:'#da3d2c'},{p:1,tip:'#c8201f'}]},
+    {p:.35,tip:'#c9a24e'},{p:.55,tip:'#e08a48'},{p:.75,tip:'#ea7040'},{p:.92,tip:'#ea5a3a'},{p:1,tip:'#dc3a2c'},{p:1,tip:'#c8183a'}]},
 };
 
 function mix(a,b,t){
@@ -151,20 +157,27 @@ function tomatoSVG(v,lv){
     <g fill="#3f7d2a"><path d="M60 ${topY} l-16 -4 l12 6 l-10 10 l14 -8 l14 8 l-10 -10 l12 -6 l-16 4 z"/>
     <rect x="57.5" y="${topY-14}" width="5" height="12" rx="2"/></g></svg>`;
 }
-// 写真ファイル：photos/large-1.jpg 〜 large-5.jpg、photos/mini-1.jpg 〜 mini-5.jpg
+// 写真ファイル：photos/large-1.jpg 〜 large-5.jpg、photos/mini-1.jpg 〜 mini-6.jpg
 // 読み込めた番号だけ写真に切り替わる（無い番号はイラストのまま）
-const PHOTO_VER='1'; // 写真を差し替えたら数字を上げると、古い写真が残らない
+const PHOTO_VER='2'; // 写真を差し替えたら数字を上げると、古い写真が残らない
 const photo=(v,n)=>`<img src="photos/${v}-${n}.jpg?v=${PHOTO_VER}" alt="" draggable="false" onload="this.parentNode.classList.add('has')">`;
 const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div><div class="pic">${photo(v,i+1)}${tomatoSVG(v,l)}</div><span class="ok">👍</span></div>`).join('');
 
 // 収穫OKにした番号（品種ごと）
 const picked={large:new Set(),mini:new Set()};
+// 段階の数を画面の並びに反映
+function setCount(el,v){
+  const n=DATA[v].levels.length;
+  el.style.setProperty('--n',n);
+  el.classList.toggle('six',n===6);
+}
 let current='large';
 function setVariety(v){
   current=v;
   document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.v===v));
   const sc=document.getElementById('scale');
   sc.innerHTML=cards(v,true);
+  setCount(sc,v);
   sc.querySelectorAll('.lv').forEach(c=>{
     c.onclick=()=>toggle(+c.dataset.n);
     c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle(+c.dataset.n);}};
@@ -176,7 +189,8 @@ function toggle(n){
   const s=picked[current];
   const min=s.size?Math.min(...s):0;
   s.clear();
-  if(n!==min) for(let k=n;k<=5;k++) s.add(k);
+  const max=DATA[current].levels.length;
+  if(n!==min) for(let k=n;k<=max;k++) s.add(k);
   paint();build();
 }
 function paint(){
@@ -220,6 +234,8 @@ async function copyMsg(){
   showDate();
   document.getElementById('p-large').innerHTML=cards('large',false);
   document.getElementById('p-mini').innerHTML=cards('mini',false);
+  setCount(document.getElementById('p-large'),'large');
+  setCount(document.getElementById('p-mini'),'mini');
   setVariety('large');build();
 })();
 </script>
