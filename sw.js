@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tomato-sizer-v7';
+const CACHE_NAME = 'tomato-sizer-v8';
 const ASSETS = [
   './',
   './index.html',

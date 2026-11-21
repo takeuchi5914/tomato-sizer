@@ -44,6 +44,8 @@ h1{font-size:22px;font-weight:900}
 /* 1つでもタップされたら、タップしていない番号は薄暗く */
 .scale.picked .lv:not(.on){opacity:.3;filter:brightness(.75)}
 .hint{text-align:center;font-size:13px;color:var(--muted);margin-top:10px}
+.share{display:block;width:100%;margin-top:12px;padding:14px;border:none;border-radius:14px;background:#06c755;color:#fff;font:inherit;font-size:18px;font-weight:900;cursor:pointer}
+.share:disabled{opacity:.6}
 details{margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
 summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .row{display:flex;align-items:center;gap:10px;margin-top:12px}
@@ -110,6 +112,7 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
 
   <div class="scale" id="scale"></div>
   <p class="hint">👆 タップ / แตะ / Ketuk</p>
+  <button class="share" id="shareBtn" onclick="shareImage()">📤 LINEで送る</button>
 
   <!-- 社員用：ふだんは閉じておく -->
   <details>
@@ -214,6 +217,84 @@ function paint(){
   });
 }
 function clearAll(){picked.large.clear();picked.mini.clear();paint();build();}
+
+// ===== LINEで送る：👍の状態を1枚の画像にして共有メニューを開く =====
+// 送り先は端末の共有メニューで「LINE」を選ぶ。画像は端末の中だけで作り、外部には送らない
+const LABEL={large:'大玉トマト / ผลใหญ่ / Besar',mini:'ミニトマト / เชอร์รี่ / Mini'};
+function loadImg(src){
+  return new Promise((ok,ng)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=ng;im.src=src;});
+}
+// 印刷用の欄（両品種とも常に読み込み済み）から写真かイラストを取り出す
+async function levelImages(v){
+  const out=[];
+  for(const c of document.querySelectorAll(`#p-${v} .lv`)){
+    const pics=[];
+    const p1=c.querySelector('.pic:not(.pic2)'), p2=c.querySelector('.pic2');
+    if(p1.classList.contains('has')) pics.push(await loadImg(p1.querySelector('img').src));
+    else{
+      const svg=new XMLSerializer().serializeToString(p1.querySelector('svg'));
+      pics.push(await loadImg('data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)));
+    }
+    if(p2.classList.contains('has')) pics.push(await loadImg(p2.querySelector('img').src));
+    out.push(pics);
+  }
+  return out;
+}
+function rrect(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+async function makeImage(){
+  // 👍がある品種だけ。どちらも無ければ表示中の品種
+  let vs=['large','mini'].filter(v=>picked[v].size);
+  if(!vs.length) vs=[current];
+  const F="'Hiragino Sans','Noto Sans JP','Noto Sans Thai',sans-serif";
+  const W=1080,PAD=40,ROW=190,GAP=14,HEAD=150,SEC=90;
+  const data={};for(const v of vs) data[v]=await levelImages(v);
+  const H=HEAD+vs.reduce((h,v)=>h+SEC+data[v].length*(ROW+GAP),0)+PAD;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;
+  const g=cv.getContext('2d');
+  g.fillStyle='#f3f1ec';g.fillRect(0,0,W,H);
+  g.fillStyle='#222';g.textAlign='center';g.textBaseline='middle';
+  g.font=`900 64px ${F}`;g.fillText('📅 '+todayText(),W/2,80);
+  let y=HEAD;
+  for(const v of vs){
+    g.textAlign='left';g.fillStyle='#c0392b';g.font=`900 44px ${F}`;g.fillText(LABEL[v],PAD,y+40);
+    y+=SEC;
+    const s=picked[v];
+    data[v].forEach((pics,i)=>{
+      const n=i+1,on=s.has(n),dim=s.size&&!on;
+      g.save();if(dim) g.globalAlpha=.3;
+      rrect(g,PAD,y,W-PAD*2,ROW,22);g.fillStyle=on?'#f1f8f1':'#fff';g.fill();
+      g.lineWidth=on?8:3;g.strokeStyle=on?'#2e7d32':'#dedad2';g.stroke();
+      g.fillStyle='#222';g.textAlign='center';g.font=`900 120px ${F}`;g.fillText(n,PAD+90,y+ROW/2+6);
+      const sz=ROW-24;let x=PAD+190;
+      for(const im of pics){g.drawImage(im,x,y+12,sz,sz);x+=sz+16;}
+      if(on){g.font=`96px ${F}`;g.fillText('👍',W-PAD-80,y+ROW/2+4);}
+      g.restore();
+      y+=ROW+GAP;
+    });
+  }
+  return new Promise(ok=>cv.toBlob(ok,'image/png'));
+}
+async function shareImage(){
+  const b=document.getElementById('shareBtn');
+  b.disabled=true;b.textContent='作成中…';
+  try{
+    if(document.fonts&&document.fonts.ready) await document.fonts.ready;
+    const blob=await makeImage();
+    const file=new File([blob],`irome-${todayText().replace(/\//g,'')}.png`,{type:'image/png'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file]});
+    }else{
+      // パソコンなど共有メニューが無い端末：画像を保存
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=file.name;a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),5000);
+      alert('画像を保存しました。LINEに貼り付けて送ってください。');
+    }
+  }catch(e){
+    if(e&&e.name!=='AbortError') alert('画像を作れませんでした：'+(e.message||e));
+  }finally{
+    b.disabled=false;b.textContent='📤 LINEで送る';
+  }
+}
 
 // 当日の日付（2026/11/20 形式）
 function todayText(){
