@@ -35,6 +35,9 @@ h1{font-size:22px;font-weight:900}
 .pic img{display:none;object-fit:cover;border-radius:12px}
 .pic.has img{display:block}
 .pic.has svg{display:none}
+/* 2枚目（ヘタ側）の写真：あるときだけ表示 */
+.pic2{display:none}
+.pic2.has{display:block;margin-top:6px}
 .lv.on{border-color:var(--ok);background:#f1f8f1}
 .lv.on .ok{display:block;animation:pop .25s ease}
 @keyframes pop{0%{transform:scale(.3)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
@@ -62,6 +65,12 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .scale{gap:6px}
   /* 6段階のときも1画面に収まるよう小さめに */
   .scale.six .pic{width:84px}
+  /* 写真2枚（お尻側・ヘタ側）を横に並べる */
+  .lv.duo{justify-content:flex-start;gap:10px;padding-left:14px}
+  .lv.duo .num{width:44px}
+  .lv.duo .pic{width:96px}
+  .lv.duo .pic2.has{margin-top:0}
+  .lv.duo .ok{right:12px}
   .scale.six .lv{padding:3px 12px}
   .scale.six .lv .num{font-size:46px}
   .date{font-size:22px;padding:6px}
@@ -79,6 +88,7 @@ textarea{width:100%;margin-top:12px;font:inherit;font-size:16px;line-height:1.7;
   .lv .ok{display:none!important}
   .lv .num{font-size:56px}
   .pic{max-width:175px}
+  .lv.duo .pic{max-width:118px}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -159,9 +169,10 @@ function tomatoSVG(v,lv){
 }
 // 写真ファイル：photos/large-1.jpg 〜 large-5.jpg、photos/mini-1.jpg 〜 mini-6.jpg
 // 読み込めた番号だけ写真に切り替わる（無い番号はイラストのまま）
-const PHOTO_VER='2'; // 写真を差し替えたら数字を上げると、古い写真が残らない
-const photo=(v,n)=>`<img src="photos/${v}-${n}.jpg?v=${PHOTO_VER}" alt="" draggable="false" onload="this.parentNode.classList.add('has')">`;
-const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div><div class="pic">${photo(v,i+1)}${tomatoSVG(v,l)}</div><span class="ok">👍</span></div>`).join('');
+const PHOTO_VER='3'; // 写真を差し替えたら数字を上げると、古い写真が残らない
+// 2枚目：photos/large-1-b.jpg のように「-b」を付けたもの（ヘタ側の写真）。あれば横に並べる
+const photo=(v,n,sfx='')=>`<img src="photos/${v}-${n}${sfx}.jpg?v=${PHOTO_VER}" alt="" draggable="false" onload="this.parentNode.classList.add('has');${sfx?"this.closest('.lv').classList.add('duo')":''}">`;
+const cards=(v,tap)=>DATA[v].levels.map((l,i)=>`<div class="lv" data-n="${i+1}"${tap?' role="button" tabindex="0"':''}><div class="num">${i+1}</div><div class="pic">${photo(v,i+1)}${tomatoSVG(v,l)}</div><div class="pic pic2">${photo(v,i+1,'-b')}</div><span class="ok">👍</span></div>`).join('');
 
 // 収穫OKにした番号（品種ごと）
 const picked={large:new Set(),mini:new Set()};
