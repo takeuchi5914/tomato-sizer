@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f3f1ec">
+<title>二十四節気と日射</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap">
+<!-- 節気名だけ筆文字フォント（使う文字だけを読み込む） -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&display=swap&text=%E7%AB%8B%E6%98%A5%E9%9B%A8%E6%B0%B4%E5%95%93%E8%9F%84%E5%88%86%E6%B8%85%E6%98%8E%E7%A9%80%E5%A4%8F%E5%B0%8F%E6%BA%80%E8%8A%92%E7%A8%AE%E8%87%B3%E6%9A%91%E5%A4%A7%E7%A7%8B%E5%87%A6%E7%99%BD%E9%9C%B2%E5%AF%92%E9%9C%9C%E9%99%8D%E5%86%AC%E9%9B%AA%E4%BA%8C%E5%8D%81%E5%9B%9B%E7%AF%80%E6%B0%97">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#f3f1ec;--card:#fff;--line:#dedad2;--text:#222;--muted:#77716a;--accent:#c0392b;--sun:#e8a317;--set:#5b6bb5}
+html,body{font-family:'Hiragino Sans','Noto Sans JP','Meiryo',sans-serif;background:var(--bg);color:var(--text)}
+body{max-width:960px;margin:0 auto;padding:16px 16px 40px}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+h1{font-size:21px;font-weight:900}
+.back{font-size:13px;color:var(--muted);text-decoration:none;white-space:nowrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.muted{color:var(--muted)}
+.fude{font-family:'Yuji Syuku','Hiragino Mincho ProN','Yu Mincho',serif}
+
+/* 場所・年 */
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar select,.bar input,.bar button{font:inherit;font-size:14px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--text)}
+.bar button{cursor:pointer;font-weight:700}
+.year{display:flex;align-items:center;gap:6px;margin-left:auto}
+.year b{font-size:18px;min-width:56px;text-align:center}
+#custom{display:none;margin-top:8px}
+#custom.show{display:flex}
+#custom input{width:100px}
+.farms{display:flex;gap:8px;margin-bottom:10px}
+.farms button{flex:1;font:inherit;font-weight:900;font-size:16px;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;line-height:1.3}
+.farms button small{display:block;font-size:11px;font-weight:700}
+.farms button.active{border-color:var(--accent);background:var(--accent);color:#fff}
+.locnote{font-size:12px;margin-top:6px}
+
+/* 今日 */
+.today{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
+.today .k{font-size:11px;color:var(--muted)}
+.today .v{font-size:20px;font-weight:900;line-height:1.3}
+.today .v small{font-size:11px;font-weight:700}
+.todayhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px;gap:8px;flex-wrap:wrap}
+.todayhead .term{font-size:22px}
+
+.layout{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:760px){.layout{grid-template-columns:1.1fr 1fr;align-items:start}}
+
+/* 円図 */
+.wheelwrap{background:#7d7d7d;border-radius:14px;padding:10px;margin-bottom:12px}
+svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto;user-select:none;-webkit-user-select:none}
+.seg{cursor:pointer}
+.seg path.base{stroke:#fff;stroke-width:1.2}
+.seg.sel path.base{stroke:#222;stroke-width:3}
+.legend{display:flex;justify-content:center;gap:14px;font-size:12px;color:#fff;margin-top:6px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+
+/* 詳細 */
+.detail h2{font-size:30px;line-height:1.1}
+.detail .yomi{font-size:13px;color:var(--muted);margin-left:6px}
+.detail .when{font-size:13px;color:var(--muted);margin:4px 0 12px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.stat{border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat .k{font-size:12px;color:var(--muted)}
+.stat .v{font-size:26px;font-weight:900;line-height:1.25}
+.stat .v small{font-size:12px;font-weight:700}
+.stat.rise .v{color:var(--sun)}
+.stat.set .v{color:var(--set)}
+.stat.mj .v{color:var(--accent)}
+.navbtns{display:flex;gap:8px;margin-top:10px}
+.navbtns button{flex:1;font:inherit;font-weight:700;padding:10px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer}
+
+/* 表 */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:7px 4px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:11px;color:var(--muted);font-weight:700}
+td.name{text-align:left;font-weight:900}
+td.name i{display:inline-block;width:8px;height:18px;border-radius:2px;vertical-align:-4px;margin-right:6px}
+tr{cursor:pointer}
+tr.sel td{background:#fff4e5}
+tr.now td.name::after{content:'今';font-size:10px;color:#fff;background:var(--accent);border-radius:4px;padding:1px 4px;margin-left:4px;vertical-align:2px}
+td.mj{font-weight:700;color:var(--accent)}
+.note{font-size:12px;color:var(--muted);line-height:1.7}
+.note li{margin-left:1.2em}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☀️ 二十四節気と日射</h1>
+  <a class="back" href="./index.html">← トマトサイザー</a>
+</header>
+
+<!-- 場所と年 -->
+<div class="card">
+  <div class="farms" id="farms"></div>
+  <div class="bar">
+    <select id="place" aria-label="場所"></select>
+    <button id="geo" type="button">📍 現在地</button>
+    <div class="year">
+      <button type="button" id="prevY" aria-label="前の年">◀</button>
+      <b id="yearText"></b>
+      <button type="button" id="nextY" aria-label="次の年">▶</button>
+    </div>
+  </div>
+  <div id="custom" class="bar">
+    <label>緯度 <input id="lat" type="number" step="0.01" inputmode="decimal"></label>
+    <label>経度 <input id="lon" type="number" step="0.01" inputmode="decimal"></label>
+    <label>標高m <input id="elev" type="number" step="1" inputmode="numeric" style="width:70px"></label>
+  </div>
+  <div class="locnote muted" id="locText"></div>
+</div>
+
+<!-- 今日 -->
+<div class="card">
+  <div class="todayhead">
+    <div><span class="muted" style="font-size:13px" id="todayDate"></span> <span class="term fude" id="todayTerm"></span></div>
+    <div class="muted" style="font-size:13px" id="todayNext"></div>
+  </div>
+  <div class="today">
+    <div><div class="k">日の出</div><div class="v" style="color:var(--sun)" id="tRise"></div></div>
+    <div><div class="k">日の入</div><div class="v" style="color:var(--set)" id="tSet"></div></div>
+    <div><div class="k">日長</div><div class="v" id="tLen"></div></div>
+    <div><div class="k">晴天日射</div><div class="v" style="color:var(--accent)" id="tMJ"></div></div>
+  </div>
+</div>
+
+<div class="layout">
+  <div>
+    <div class="wheelwrap">
+      <svg id="wheel" viewBox="-210 -210 420 420" role="img" aria-label="二十四節気の円図"></svg>
+      <div class="legend">
+        <span><i style="background:#fff"></i>外側：節気名・節入り日</span>
+        <span><i style="background:#f6c343"></i>内側の棒：晴天日射 MJ/m²</span>
+        <span>▲：今日</span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="card detail" id="detail"></div>
+  </div>
+</div>
+
+<div class="card" style="overflow-x:auto">
+  <table>
+    <thead><tr><th style="text-align:left">節気</th><th>節入り</th><th>日の出</th><th>日の入</th><th>日長</th><th>晴天日射<br>MJ/m²</th></tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<div class="card note">
+  <b>数値について</b>
+  <ul>
+    <li>時刻はすべて日本時間。日の出・日の入は標高0m・大気差込みの計算値で、誤差は±1〜2分程度です。</li>
+    <li>節入り日時は太陽黄経からの計算値（国立天文台の暦と比べて誤差10分以内）。境目が深夜0時前後の年は、暦と1日ずれることがあります。</li>
+    <li><b>晴天日射</b>は雲のない日の理論値（FAO-56の晴天日射量 Rso）です。実際の日射は天気で大きく下がり、平均すると理論値のおよそ5〜7割です（推定）。実測の平年値は気象庁の「過去の気象データ」で確認できます。</li>
+  </ul>
+</div>
+
+<script>
+'use strict';
+const TERMS = [
+  ['立春','りっしゅん'],['雨水','うすい'],['啓蟄','けいちつ'],['春分','しゅんぶん'],['清明','せいめい'],['穀雨','こくう'],
+  ['立夏','りっか'],['小満','しょうまん'],['芒種','ぼうしゅ'],['夏至','げし'],['小暑','しょうしょ'],['大暑','たいしょ'],
+  ['立秋','りっしゅう'],['処暑','しょしょ'],['白露','はくろ'],['秋分','しゅうぶん'],['寒露','かんろ'],['霜降','そうこう'],
+  ['立冬','りっとう'],['小雪','しょうせつ'],['大雪','たいせつ'],['冬至','とうじ'],['小寒','しょうかん'],['大寒','だいかん']
+];
+// 立春 = 太陽黄経315°。以降15°ずつ
+const termLon = i => (315 + 15 * i) % 360;
+const SEASONS = ['春','夏','秋','冬'];
+// 農場（座標は地区の中心付近の概略値。番地レベルの位置は載せない）
+const FARMS = [['菊川',34.76,138.08,30,'静岡県菊川市'],['昭和村',36.64,139.07,600,'群馬県利根郡昭和村']];
+const PLACES = [
+  ...FARMS.map(f => f.slice(0, 4)),
+  ['東京',35.69,139.69,0],['札幌',43.06,141.35,0],['仙台',38.27,140.87,0],['新潟',37.90,139.02,0],
+  ['名古屋',35.18,136.91,0],['大阪',34.69,135.50,0],['広島',34.40,132.46,0],['高知',33.56,133.53,0],
+  ['福岡',33.59,130.40,0],['熊本',32.80,130.71,0],['鹿児島',31.56,130.56,0],['那覇',26.21,127.68,0]
+];
+const JST = 9 * 3600000;
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const MJ_MAX = 35; // 棒の長さの基準（全国・年間でほぼ収まる値）
+
+/* ---------- 天文計算 ---------- */
+const jdOf = ms => ms / 86400000 + 2440587.5;
+const msOf = jd => (jd - 2440587.5) * 86400000;
+function sun(jd) {
+  const T = (jd - 2451545) / 36525;
+  const L0 = (280.46646 + T * (36000.76983 + 0.0003032 * T)) % 360;
+  const M = 357.52911 + T * (35999.05029 - 0.0001537 * T);
+  const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+  const Mr = M * D2R;
+  const C = Math.sin(Mr) * (1.914602 - T * (0.004817 + 0.000014 * T)) + Math.sin(2 * Mr) * (0.019993 - 0.000101 * T) + Math.sin(3 * Mr) * 0.000289;
+  const om = (125.04 - 1934.136 * T) * D2R;
+  const lam = ((L0 + C - 0.00569 - 0.00478 * Math.sin(om)) % 360 + 360) % 360;
+  const eps0 = 23 + (26 + (21.448 - T * (46.815 + T * (0.00059 - T * 0.001813))) / 60) / 60;
+  const eps = (eps0 + 0.00256 * Math.cos(om)) * D2R;
+  const decl = Math.asin(Math.sin(eps) * Math.sin(lam * D2R));
+  const y = Math.tan(eps / 2) ** 2, L = L0 * D2R;
+  const eot = 4 * R2D * (y * Math.sin(2 * L) - 2 * e * Math.sin(Mr) + 4 * e * y * Math.sin(Mr) * Math.cos(2 * L) - 0.5 * y * y * Math.sin(4 * L) - 1.25 * e * e * Math.sin(2 * Mr));
+  return { lam, decl, eot };
+}
+// 年yの中で黄経lamになる瞬間（JD）
+function termJD(year, lam) {
+  let d = lam >= 285 ? lam - 360 : lam; // 小寒〜啓蟄は春分より前
+  let jd = jdOf(Date.UTC(year, 2, 20, 12)) + d / 360 * 365.2422;
+  for (let k = 0; k < 8; k++) {
+    const diff = ((lam - sun(jd).lam + 540) % 360) - 180;
+    jd += diff / 360 * 365.2422;
+    if (Math.abs(diff) < 1e-6) break;
+  }
+  return jd;
+}
+// JSTの日付(y,m,d)の日の出・日の入（JST 0時からの分）
+function sunTimes(y, m, d, lat, lon) {
+  const jd0 = jdOf(Date.UTC(y, m, d) - JST);
+  const phi = lat * D2R, h0 = -0.833 * D2R;
+  const one = rise => {
+    let t = 720 + (135 - lon) * 4;
+    for (let k = 0; k < 3; k++) {
+      const s = sun(jd0 + t / 1440);
+      const cosH = (Math.sin(h0) - Math.sin(phi) * Math.sin(s.decl)) / (Math.cos(phi) * Math.cos(s.decl));
+      if (cosH > 1) return 'night';
+      if (cosH < -1) return 'day';
+      const H = Math.acos(cosH) * R2D;
+      const noon = 720 + (135 - lon) * 4 - s.eot;
+      t = rise ? noon - 4 * H : noon + 4 * H;
+    }
+    return t;
+  };
+  return { rise: one(true), set: one(false) };
+}
+// 晴天日射量 Rso（MJ/m²/日, FAO-56）
+function clearSkyMJ(y, m, d, lat, elev) {
+  const ms = Date.UTC(y, m, d, 12) - JST;
+  const J = Math.round((Date.UTC(y, m, d) - Date.UTC(y, 0, 0)) / 86400000);
+  const dr = 1 + 0.033 * Math.cos(2 * Math.PI * J / 365);
+  const decl = sun(jdOf(ms)).decl, phi = lat * D2R;
+  const ws = Math.acos(Math.max(-1, Math.min(1, -Math.tan(phi) * Math.tan(decl))));
+  const Ra = 24 * 60 / Math.PI * 0.0820 * dr * (ws * Math.sin(phi) * Math.sin(decl) + Math.cos(phi) * Math.cos(decl) * Math.sin(ws));
+  return (0.75 + 2e-5 * (elev || 0)) * Ra;
+}
+
+/* ---------- 表示用 ---------- */
+const pad = n => String(n).padStart(2, '0');
+function hmFix(t) { if (typeof t !== 'number') return '—'; const r = Math.round(t); return `${Math.floor(r / 60)}:${pad(r % 60)}`; }
+function lenText(st) {
+  if (st.rise === 'day' || st.set === 'day') return '24時間';
+  if (typeof st.rise !== 'number' || typeof st.set !== 'number') return '0時間';
+  const r = Math.round(st.set - st.rise); return `${Math.floor(r / 60)}時間${pad(r % 60)}分`;
+}
+const WD = '日月火水木金土';
+const jstParts = ms => { const d = new Date(ms + JST); return { y: d.getUTCFullYear(), m: d.getUTCMonth(), d: d.getUTCDate(), h: d.getUTCHours(), mi: d.getUTCMinutes(), w: d.getUTCDay() }; };
+const hue = i => (190 - i * 15 + 360) % 360;
+const segColor = i => `hsl(${hue(i)},62%,52%)`;
+
+/* ---------- 状態 ---------- */
+let loc = { name: FARMS[0][0], lat: FARMS[0][1], lon: FARMS[0][2], elev: FARMS[0][3] };
+try { const s = JSON.parse(localStorage.getItem('solarTermsLoc')); if (s && isFinite(s.lat) && isFinite(s.lon)) loc = s; } catch (e) {}
+const nowP = jstParts(Date.now());
+let year = nowP.y, sel = null, data = [];
+
+function compute() {
+  data = TERMS.map((t, i) => {
+    const jd = termJD(year, termLon(i));
+    const p = jstParts(msOf(jd));
+    const st = sunTimes(p.y, p.m, p.d, loc.lat, loc.lon);
+    return { i, name: t[0], yomi: t[1], p, st, mj: clearSkyMJ(p.y, p.m, p.d, loc.lat, loc.elev) };
+  });
+}
+// 今日がどの節気か（黄経から）
+const curIdx = () => Math.floor(((sun(jdOf(Date.now())).lam - 315 + 360) % 360) / 15);
+
+/* ---------- 円図 ---------- */
+const P = (a, r) => [r * Math.sin(a * D2R), -r * Math.cos(a * D2R)];
+function wedge(a1, a2, r1, r2) {
+  const [x1, y1] = P(a1, r2), [x2, y2] = P(a2, r2), [x3, y3] = P(a2, r1), [x4, y4] = P(a1, r1);
+  return `M${x1} ${y1}A${r2} ${r2} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r1} ${r1} 0 0 0 ${x4} ${y4}Z`;
+}
+// 接線方向の文字（下半分は逆さにならないよう反転）
+function tText(a, r, txt, cls, size, fill) {
+  const [x, y] = P(a, r), rot = a > 90 && a < 270 ? a + 180 : a;
+  return `<text x="${x}" y="${y}" transform="rotate(${rot} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-size="${size}" fill="${fill}" class="${cls}">${txt}</text>`;
+}
+// 半径方向の文字（左半分は逆さにならないよう反転）
+function rText(a, r, txt, size, fill) {
+  const [x, y] = P(a, r), rot = a < 180 ? a - 90 : a + 90;
+  return `<text x="${x}" y="${y}" transform="rotate(${rot} ${x} ${y})" text-anchor="middle" dominant-baseline="central" font-size="${size}" font-weight="700" fill="${fill}">${txt}</text>`;
+}
+function drawWheel() {
+  const cur = year === nowP.y ? curIdx() : -1;
+  let s = `<circle r="206" fill="#fff"/>`;
+  data.forEach(t => {
+    const a1 = t.i * 15, a2 = a1 + 15, am = a1 + 7.5, h = hue(t.i);
+    const bar = 58 + 52 * Math.min(1, t.mj / MJ_MAX);
+    s += `<g class="seg${sel === t.i ? ' sel' : ''}" data-i="${t.i}">`;
+    s += `<path class="base" d="${wedge(a1, a2, 56, 200)}" fill="hsl(${h},60%,${t.i === cur ? 46 : 52}%)"/>`;
+    s += `<path d="${wedge(a1, a2, 56, 116)}" fill="rgba(255,255,255,.82)"/>`;
+    s += `<path d="${wedge(a1 + 1.5, a2 - 1.5, 58, bar)}" fill="hsl(${h},70%,58%)"/>`;
+    s += tText(am, 170, t.name, 'fude', 21, '#fff');
+    s += tText(am, 133, `${t.p.m + 1}/${t.p.d}`, '', 11.5, '#fff');
+    s += rText(am, 87, t.mj.toFixed(1), 10.5, '#222');
+    s += `</g>`;
+  });
+  s += `<circle r="148" fill="none" stroke="#fff" stroke-width="1.5"/>`;
+  s += `<circle r="56" fill="#fff"/>`;
+  // 季節（立春・立夏・立秋・立冬からの90°ずつ）
+  SEASONS.forEach((k, j) => { const [x, y] = P(j * 90 + 45, 40); s += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="13" class="fude" fill="#666">${k}</text>`; });
+  s += `<circle r="13" fill="#f6c343"/>`;
+  for (let k = 0; k < 12; k++) { const [x1, y1] = P(k * 30, 16), [x2, y2] = P(k * 30, 22); s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#f6c343" stroke-width="2.5" stroke-linecap="round"/>`; }
+  if (cur >= 0) {
+    const a = (sun(jdOf(Date.now())).lam - 315 + 360) % 360;
+    const [x, y] = P(a, 203), [xa, ya] = P(a - 3.2, 212), [xb, yb] = P(a + 3.2, 212);
+    s += `<line x1="${P(a, 56)[0]}" y1="${P(a, 56)[1]}" x2="${x}" y2="${y}" stroke="#222" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+    s += `<path d="M${x} ${y}L${xa} ${ya}L${xb} ${yb}Z" fill="#222"/>`;
+  }
+  wheel.innerHTML = s;
+}
+wheel.addEventListener('click', e => { const g = e.target.closest('.seg'); if (g) select(+g.dataset.i); });
+
+/* ---------- 詳細・表 ---------- */
+function drawDetail() {
+  const t = data[sel], p = t.p;
+  detail.innerHTML = `
+    <div><span class="fude" style="font-size:34px;color:${segColor(t.i)}">${t.name}</span><span class="yomi">${t.yomi}</span></div>
+    <div class="when">${p.y}年${p.m + 1}月${p.d}日(${WD[p.w]}) ${p.h}:${pad(p.mi)} 節入り ・ 二十四節気の${t.i + 1}番目（立春から）</div>
+    <div class="stats">
+      <div class="stat rise"><div class="k">🌅 日の出</div><div class="v">${hmFix(t.st.rise)}</div></div>
+      <div class="stat set"><div class="k">🌇 日の入</div><div class="v">${hmFix(t.st.set)}</div></div>
+      <div class="stat"><div class="k">日長（昼の長さ）</div><div class="v" style="font-size:20px">${lenText(t.st)}</div></div>
+      <div class="stat mj"><div class="k">晴天日射（理論値）</div><div class="v">${t.mj.toFixed(1)}<small> MJ/m²</small></div></div>
+    </div>
+    <div class="navbtns"><button type="button" onclick="select((sel+23)%24)">◀ ${data[(sel + 23) % 24].name}</button><button type="button" onclick="select((sel+1)%24)">${data[(sel + 1) % 24].name} ▶</button></div>`;
+}
+function drawTable() {
+  const cur = year === nowP.y ? curIdx() : -1;
+  tbody.innerHTML = data.map(t => `<tr class="${t.i === sel ? 'sel' : ''}${t.i === cur ? ' now' : ''}" data-i="${t.i}">
+    <td class="name"><i style="background:${segColor(t.i)}"></i>${t.name}</td>
+    <td>${t.p.m + 1}/${t.p.d}</td><td>${hmFix(t.st.rise)}</td><td>${hmFix(t.st.set)}</td>
+    <td>${lenText(t.st).replace('時間', 'h').replace('分', 'm')}</td><td class="mj">${t.mj.toFixed(1)}</td></tr>`).join('');
+}
+tbody.addEventListener('click', e => { const tr = e.target.closest('tr'); if (tr) { select(+tr.dataset.i); window.scrollTo({ top: 0, behavior: 'smooth' }); } });
+function select(i) { sel = i; drawWheel(); drawDetail(); drawTable(); }
+
+function drawToday() {
+  const i = curIdx();
+  const st = sunTimes(nowP.y, nowP.m, nowP.d, loc.lat, loc.lon);
+  todayDate.textContent = `今日 ${nowP.m + 1}/${nowP.d}(${WD[nowP.w]})`;
+  todayTerm.textContent = TERMS[i][0];
+  todayTerm.style.color = segColor(i);
+  // 次の節気まで
+  const nl = termLon((i + 1) % 24);
+  let jd = termJD(nowP.y, nl); if (msOf(jd) < Date.now()) jd = termJD(nowP.y + 1, nl);
+  const np = jstParts(msOf(jd));
+  const days = Math.round((Date.UTC(np.y, np.m, np.d) - Date.UTC(nowP.y, nowP.m, nowP.d)) / 86400000);
+  todayNext.textContent = `次は ${TERMS[(i + 1) % 24][0]}（${np.m + 1}/${np.d}）まであと${days}日`;
+  tRise.textContent = hmFix(st.rise);
+  tSet.textContent = hmFix(st.set);
+  tLen.textContent = lenText(st).replace('時間', 'h').replace('分', 'm');
+  tMJ.innerHTML = `${clearSkyMJ(nowP.y, nowP.m, nowP.d, loc.lat, loc.elev).toFixed(1)}<small> MJ</small>`;
+}
+
+/* ---------- 場所 ---------- */
+function drawFarms() {
+  farms.innerHTML = FARMS.map(f => `<button type="button" data-n="${f[0]}" class="${loc.name === f[0] ? 'active' : ''}">🍅 ${f[0]}<small>${f[4]}</small></button>`).join('');
+}
+farms.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const f = FARMS.find(q => q[0] === b.dataset.n);
+  loc = { name: f[0], lat: f[1], lon: f[2], elev: f[3] }; saveLoc(); fillPlaces(); render();
+});
+function fillPlaces() {
+  place.innerHTML = PLACES.map(p => `<option value="${p[0]}">${p[0]}</option>`).join('') + `<option value="__custom">緯度経度を入力</option>`;
+  const hit = PLACES.find(p => p[0] === loc.name);
+  place.value = hit ? hit[0] : '__custom';
+  custom.classList.toggle('show', !hit);
+  lat.value = loc.lat; lon.value = loc.lon; elev.value = loc.elev || 0;
+}
+function saveLoc() { try { localStorage.setItem('solarTermsLoc', JSON.stringify(loc)); } catch (e) {} }
+function render() {
+  drawFarms();
+  yearText.textContent = year;
+  locText.textContent = `📍 ${loc.name === '__custom' || !PLACES.find(p => p[0] === loc.name) ? (loc.name || '指定地点') : loc.name}（北緯${(+loc.lat).toFixed(2)}° 東経${(+loc.lon).toFixed(2)}°${loc.elev ? ` 標高${loc.elev}m` : ''}）・ 時刻は日本時間`;
+  compute(); drawToday(); select(sel ?? (year === nowP.y ? curIdx() : 0));
+}
+place.addEventListener('change', () => {
+  if (place.value === '__custom') { custom.classList.add('show'); loc = { ...loc, name: '指定地点' }; }
+  else { const p = PLACES.find(q => q[0] === place.value); loc = { name: p[0], lat: p[1], lon: p[2], elev: p[3] }; custom.classList.remove('show'); lat.value = p[1]; lon.value = p[2]; elev.value = p[3]; }
+  saveLoc(); render();
+});
+[lat, lon, elev].forEach(el => el.addEventListener('change', () => {
+  const a = parseFloat(lat.value), b = parseFloat(lon.value), z = parseFloat(elev.value) || 0;
+  if (!isFinite(a) || !isFinite(b) || Math.abs(a) > 66 || Math.abs(b) > 180) return;
+  loc = { name: '指定地点', lat: a, lon: b, elev: z }; place.value = '__custom'; saveLoc(); render();
+}));
+geo.addEventListener('click', () => {
+  if (!navigator.geolocation) { alert('この端末では現在地を取得できません'); return; }
+  geo.textContent = '取得中…';
+  navigator.geolocation.getCurrentPosition(pos => {
+    geo.textContent = '📍 現在地';
+    loc = { name: '現在地', lat: +pos.coords.latitude.toFixed(3), lon: +pos.coords.longitude.toFixed(3), elev: Math.round(pos.coords.altitude || 0) };
+    saveLoc(); fillPlaces(); render();
+  }, () => { geo.textContent = '📍 現在地'; alert('現在地を取得できませんでした（位置情報の許可を確認してください）'); }, { timeout: 10000 });
+});
+prevY.addEventListener('click', () => { year--; render(); });
+nextY.addEventListener('click', () => { year++; render(); });
+
+fillPlaces(); render();
+</script>
+</body>
+</html>
