@@ -30,6 +30,10 @@ h1{font-size:21px;font-weight:900}
 #custom{display:none;margin-top:8px}
 #custom.show{display:flex}
 #custom input{width:100px}
+.farms{display:flex;gap:8px;margin-bottom:10px}
+.farms button{flex:1;font:inherit;font-weight:900;font-size:16px;padding:10px 6px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;line-height:1.3}
+.farms button small{display:block;font-size:11px;font-weight:700}
+.farms button.active{border-color:var(--accent);background:var(--accent);color:#fff}
 .locnote{font-size:12px;margin-top:6px}
 
 /* 今日 */
@@ -90,6 +94,7 @@ td.mj{font-weight:700;color:var(--accent)}
 
 <!-- 場所と年 -->
 <div class="card">
+  <div class="farms" id="farms"></div>
   <div class="bar">
     <select id="place" aria-label="場所"></select>
     <button id="geo" type="button">📍 現在地</button>
@@ -165,7 +170,10 @@ const TERMS = [
 // 立春 = 太陽黄経315°。以降15°ずつ
 const termLon = i => (315 + 15 * i) % 360;
 const SEASONS = ['春','夏','秋','冬'];
+// 農場（座標は地区の中心付近の概略値。番地レベルの位置は載せない）
+const FARMS = [['菊川',34.76,138.08,30,'静岡県菊川市'],['昭和村',36.64,139.07,600,'群馬県利根郡昭和村']];
 const PLACES = [
+  ...FARMS.map(f => f.slice(0, 4)),
   ['東京',35.69,139.69,0],['札幌',43.06,141.35,0],['仙台',38.27,140.87,0],['新潟',37.90,139.02,0],
   ['名古屋',35.18,136.91,0],['大阪',34.69,135.50,0],['広島',34.40,132.46,0],['高知',33.56,133.53,0],
   ['福岡',33.59,130.40,0],['熊本',32.80,130.71,0],['鹿児島',31.56,130.56,0],['那覇',26.21,127.68,0]
@@ -248,7 +256,7 @@ const hue = i => (190 - i * 15 + 360) % 360;
 const segColor = i => `hsl(${hue(i)},62%,52%)`;
 
 /* ---------- 状態 ---------- */
-let loc = { name: '東京', lat: 35.69, lon: 139.69, elev: 0 };
+let loc = { name: FARMS[0][0], lat: FARMS[0][1], lon: FARMS[0][2], elev: FARMS[0][3] };
 try { const s = JSON.parse(localStorage.getItem('solarTermsLoc')); if (s && isFinite(s.lat) && isFinite(s.lon)) loc = s; } catch (e) {}
 const nowP = jstParts(Date.now());
 let year = nowP.y, sel = null, data = [];
@@ -354,6 +362,14 @@ function drawToday() {
 }
 
 /* ---------- 場所 ---------- */
+function drawFarms() {
+  farms.innerHTML = FARMS.map(f => `<button type="button" data-n="${f[0]}" class="${loc.name === f[0] ? 'active' : ''}">🍅 ${f[0]}<small>${f[4]}</small></button>`).join('');
+}
+farms.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const f = FARMS.find(q => q[0] === b.dataset.n);
+  loc = { name: f[0], lat: f[1], lon: f[2], elev: f[3] }; saveLoc(); fillPlaces(); render();
+});
 function fillPlaces() {
   place.innerHTML = PLACES.map(p => `<option value="${p[0]}">${p[0]}</option>`).join('') + `<option value="__custom">緯度経度を入力</option>`;
   const hit = PLACES.find(p => p[0] === loc.name);
@@ -363,6 +379,7 @@ function fillPlaces() {
 }
 function saveLoc() { try { localStorage.setItem('solarTermsLoc', JSON.stringify(loc)); } catch (e) {} }
 function render() {
+  drawFarms();
   yearText.textContent = year;
   locText.textContent = `📍 ${loc.name === '__custom' || !PLACES.find(p => p[0] === loc.name) ? (loc.name || '指定地点') : loc.name}（北緯${(+loc.lat).toFixed(2)}° 東経${(+loc.lon).toFixed(2)}°${loc.elev ? ` 標高${loc.elev}m` : ''}）・ 時刻は日本時間`;
   compute(); drawToday(); select(sel ?? (year === nowP.y ? curIdx() : 0));
